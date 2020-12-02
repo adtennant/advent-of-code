@@ -23,7 +23,9 @@ fn find_triple(parsed_input: &HashSet<i32>, total: i32) -> Option<i32> {
 }
 
 fn main() -> Result<()> {
-    let parsed_input = parse_input(include_str!("../input"))?;
+    println!("Day 1: Report Repair");
+
+    let parsed_input = parse_input(include_str!("../input.txt"))?;
 
     println!(
         "Part 1: {:?}",
