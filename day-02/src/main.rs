@@ -1,82 +1,36 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
+use parse_display::{Display, FromStr};
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq)]
-struct PasswordPolicy(usize, usize, char);
-
-impl FromStr for PasswordPolicy {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let policy: Vec<&str> = s.split(['-', ' '].as_ref()).map(|l| l.trim()).collect();
-
-        if policy.len() != 3 {
-            bail!("policy has an invalid number of parts: {}", policy.len());
-        }
-
-        let min_occurences = policy[0]
-            .parse::<usize>()
-            .with_context(|| "failed to parse password policy: invalid first digit")?;
-        let max_occurences = policy[1]
-            .parse::<usize>()
-            .with_context(|| "failed to parse password policy: invalid second digit")?;
-        let character = policy[2]
-            .chars()
-            .next()
-            .with_context(|| "failed to parse password policy: invalid character")?;
-
-        Ok(PasswordPolicy(min_occurences, max_occurences, character))
-    }
+#[derive(Display, Debug, FromStr, PartialEq)]
+#[display("{left}-{right} {letter}")]
+struct PasswordPolicy {
+    left: usize,
+    right: usize,
+    letter: char,
 }
 
 impl PasswordPolicy {
     fn validate_corporate_policy(&self, password: &str) -> bool {
-        let character_count = password.matches(self.2).count();
+        let character_count = password.matches(self.letter).count();
 
-        character_count >= self.0 && character_count <= self.1
+        character_count >= self.left && character_count <= self.right
     }
 
     fn validate_authentication_system(&self, password: &str) -> bool {
-        let letter = self.2;
+        let first_index = self.left - 1;
+        let second_index = self.right - 1;
 
-        let first_index = self.0 - 1;
-        let second_index = self.1 - 1;
-
-        (password.chars().nth(first_index) == Some(letter))
-            ^ (password.chars().nth(second_index) == Some(letter))
+        (password.chars().nth(first_index) == Some(self.letter))
+            ^ (password.chars().nth(second_index) == Some(self.letter))
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Display, Debug, FromStr, PartialEq)]
+#[display("{policy}: {password}")]
 struct PasswordEntry {
     policy: PasswordPolicy,
     password: String,
-}
-
-impl FromStr for PasswordEntry {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let entry: Vec<&str> = s.split(": ").map(|l| l.trim()).collect();
-
-        if entry.len() != 2 {
-            bail!("entry has an invalid number of parts: {}", entry.len());
-        }
-
-        let policy =
-            PasswordPolicy::from_str(entry[0]).with_context(|| "failed to parse password entry")?;
-        let password = entry[1].to_owned();
-
-        Ok(PasswordEntry { policy, password })
-    }
-}
-
-fn parse_input(data: &str) -> Result<Vec<PasswordEntry>> {
-    data.lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
-        .map(|line| PasswordEntry::from_str(line))
-        .collect()
 }
 
 impl PasswordEntry {
@@ -89,14 +43,22 @@ impl PasswordEntry {
     }
 }
 
+fn parse_input(data: &str) -> Result<Vec<PasswordEntry>> {
+    data.lines()
+        .map(|line| line.trim())
+        .filter(|line| !line.is_empty())
+        .map(|line| PasswordEntry::from_str(line).with_context(|| "parsing input failed"))
+        .collect()
+}
+
 fn main() -> Result<()> {
     println!("Day 2: Password Philosophy");
 
-    let parsed_input = parse_input(include_str!("../input.txt"))?;
+    let input = parse_input(include_str!("../input.txt"))?;
 
     println!(
         "Part 1: {:?}",
-        parsed_input
+        input
             .iter()
             .filter(|entry| entry.matches_corporate_policy())
             .count()
@@ -104,7 +66,7 @@ fn main() -> Result<()> {
 
     println!(
         "Part 2: {:?}",
-        parsed_input
+        input
             .iter()
             .filter(|entry| entry.matches_authentication_system())
             .count()
@@ -122,7 +84,14 @@ mod tests {
         let data = "1-3 a";
         let policy = PasswordPolicy::from_str(data).unwrap();
 
-        assert_eq!(PasswordPolicy(1, 3, 'a'), policy)
+        assert_eq!(
+            PasswordPolicy {
+                left: 1,
+                right: 3,
+                letter: 'a'
+            },
+            policy
+        )
     }
 
     #[test]
@@ -132,7 +101,11 @@ mod tests {
 
         assert_eq!(
             PasswordEntry {
-                policy: PasswordPolicy(1, 3, 'a'),
+                policy: PasswordPolicy {
+                    left: 1,
+                    right: 3,
+                    letter: 'a'
+                },
                 password: String::from("abcde")
             },
             entry
@@ -183,24 +156,36 @@ mod tests {
             2-9 c: ccccccccc
         ";
 
-        let parsed_input = parse_input(data).unwrap();
+        let input = parse_input(data).unwrap();
 
         assert_eq!(
             vec![
                 PasswordEntry {
-                    policy: PasswordPolicy(1, 3, 'a'),
+                    policy: PasswordPolicy {
+                        left: 1,
+                        right: 3,
+                        letter: 'a'
+                    },
                     password: String::from("abcde")
                 },
                 PasswordEntry {
-                    policy: PasswordPolicy(1, 3, 'b'),
+                    policy: PasswordPolicy {
+                        left: 1,
+                        right: 3,
+                        letter: 'b'
+                    },
                     password: String::from("cdefg")
                 },
                 PasswordEntry {
-                    policy: PasswordPolicy(2, 9, 'c'),
+                    policy: PasswordPolicy {
+                        left: 2,
+                        right: 9,
+                        letter: 'c'
+                    },
                     password: String::from("ccccccccc")
                 }
             ],
-            parsed_input
+            input
         )
     }
 }
