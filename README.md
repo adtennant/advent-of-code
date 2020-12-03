@@ -4,3 +4,4 @@
 | -------------------------------------- | ----- |
 | [Day 1: Report Repair](./day-01)       | 🌟🌟  |
 | [Day 2: Password Philosophy](./day-02) | 🌟🌟  |
+| [Day 3: Toboggan Trajectory](./day-03) | 🌟🌟  |
