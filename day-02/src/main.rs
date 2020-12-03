@@ -8,10 +8,7 @@ impl FromStr for PasswordPolicy {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        let policy: Vec<&str> = s
-            .split(|c| c == '-' || c == ' ')
-            .map(|l| l.trim())
-            .collect();
+        let policy: Vec<&str> = s.split(['-', ' '].as_ref()).map(|l| l.trim()).collect();
 
         if policy.len() != 3 {
             bail!("policy has an invalid number of parts: {}", policy.len());
@@ -33,30 +30,20 @@ impl FromStr for PasswordPolicy {
 }
 
 impl PasswordPolicy {
-    fn matches_corporate_policy(&self, password: &str) -> bool {
+    fn validate_corporate_policy(&self, password: &str) -> bool {
         let character_count = password.matches(self.2).count();
 
         character_count >= self.0 && character_count <= self.1
     }
 
-    fn matches_authentication_system(&self, password: &str) -> bool {
+    fn validate_authentication_system(&self, password: &str) -> bool {
+        let letter = self.2;
+
         let first_index = self.0 - 1;
         let second_index = self.1 - 1;
 
-        let match_count = password
-            .chars()
-            .enumerate()
-            .filter_map(|(i, c)| {
-                if i == first_index || i == second_index {
-                    Some(c)
-                } else {
-                    None
-                }
-            })
-            .filter(|&c| c == self.2)
-            .count();
-
-        match_count == 1
+        (password.chars().nth(first_index) == Some(letter))
+            ^ (password.chars().nth(second_index) == Some(letter))
     }
 }
 
@@ -84,22 +71,22 @@ impl FromStr for PasswordEntry {
     }
 }
 
-impl PasswordEntry {
-    fn matches_corporate_policy(&self) -> bool {
-        self.policy.matches_corporate_policy(&self.password)
-    }
-
-    fn matches_authentication_system(&self) -> bool {
-        self.policy.matches_authentication_system(&self.password)
-    }
-}
-
 fn parse_input(data: &str) -> Result<Vec<PasswordEntry>> {
     data.lines()
         .map(|line| line.trim())
         .filter(|line| !line.is_empty())
         .map(|line| PasswordEntry::from_str(line))
         .collect()
+}
+
+impl PasswordEntry {
+    fn matches_corporate_policy(&self) -> bool {
+        self.policy.validate_corporate_policy(&self.password)
+    }
+
+    fn matches_authentication_system(&self) -> bool {
+        self.policy.validate_authentication_system(&self.password)
+    }
 }
 
 fn main() -> Result<()> {
