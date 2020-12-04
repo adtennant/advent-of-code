@@ -1,8 +1,26 @@
 use anyhow::{bail, Result};
-use std::str::FromStr;
+use std::{convert::TryFrom, str::FromStr};
 
 #[derive(Debug, PartialEq)]
-struct Grid(Vec<Vec<bool>>);
+enum Tile {
+    Empty,
+    Tree,
+}
+
+impl TryFrom<char> for Tile {
+    type Error = anyhow::Error;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            '.' => Ok(Tile::Empty),
+            '#' => Ok(Tile::Tree),
+            c => bail!("invalid character: {}", c),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+struct Grid(Vec<Vec<Tile>>);
 
 impl FromStr for Grid {
     type Err = anyhow::Error;
@@ -12,15 +30,7 @@ impl FromStr for Grid {
             s.lines()
                 .map(|line| line.trim())
                 .filter(|line| !line.is_empty())
-                .map(|line| {
-                    line.chars()
-                        .map(|c| match c {
-                            '#' => Ok(true),
-                            '.' => Ok(false),
-                            c => bail!("invalid character: {}", c),
-                        })
-                        .collect()
-                })
+                .map(|line| line.chars().map(Tile::try_from).collect())
                 .collect::<Result<_, _>>()?,
         ))
     }
@@ -40,7 +50,7 @@ impl Grid {
             .iter()
             .step_by(down)
             .enumerate()
-            .filter(|(i, row)| row[(i * right) % self.width()])
+            .filter(|(i, row)| row[(i * right) % self.width()] == Tile::Tree)
             .count()
     }
 }
@@ -84,17 +94,149 @@ mod tests {
 
         assert_eq!(
             Grid(vec![
-                vec![false, false, true, true, false, false, false, false, false, false, false],
-                vec![true, false, false, false, true, false, false, false, true, false, false],
-                vec![false, true, false, false, false, false, true, false, false, true, false],
-                vec![false, false, true, false, true, false, false, false, true, false, true],
-                vec![false, true, false, false, false, true, true, false, false, true, false],
-                vec![false, false, true, false, true, true, false, false, false, false, false],
-                vec![false, true, false, true, false, true, false, false, false, false, true],
-                vec![false, true, false, false, false, false, false, false, false, false, true],
-                vec![true, false, true, true, false, false, false, true, false, false, false],
-                vec![true, false, false, false, true, true, false, false, false, false, true],
-                vec![false, true, false, false, true, false, false, false, true, false, true]
+                vec![
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty
+                ],
+                vec![
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree
+                ],
+                vec![
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty
+                ],
+                vec![
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree
+                ],
+                vec![
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Empty,
+                    Tile::Tree,
+                    Tile::Empty,
+                    Tile::Tree
+                ]
             ]),
             grid
         )
