@@ -31,6 +31,7 @@ fn main() -> Result<()> {
         "Part 1: {:?}",
         find_pair(&input, 2020).with_context(|| "no matching pair found")?
     );
+
     println!(
         "Part 2: {:?}",
         find_triple(&input, 2020).with_context(|| "no matching triple found")?

@@ -59,7 +59,9 @@ fn main() -> Result<()> {
     println!("Day 3: Toboggan Trajectory");
 
     let grid = Grid::from_str(include_str!("../input.txt"))?;
+
     println!("Part 1: {:?}", grid.count_trees_for_trajectory(3, 1));
+
     println!(
         "Part 2: {:?}",
         [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
