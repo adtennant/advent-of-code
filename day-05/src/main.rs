@@ -14,31 +14,17 @@ impl FromStr for Seat {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts = s.split_at(7);
 
-        let row = u8::from_str_radix(
-            &parts
-                .0
-                .chars()
-                .map(|c| match c {
-                    'F' => Ok('0'),
-                    'B' => Ok('1'),
-                    c => bail!("invalid character: {}", c),
-                })
-                .collect::<Result<String, _>>()?,
-            2,
-        )?;
+        let row = parts.0.chars().try_fold(0u8, |result, c| match c {
+            'F' => Ok(result.wrapping_shl(1) | 0),
+            'B' => Ok(result.wrapping_shl(1) | 1),
+            _ => bail!("invalid character: {}", c),
+        })?;
 
-        let column = u8::from_str_radix(
-            &parts
-                .1
-                .chars()
-                .map(|c| match c {
-                    'L' => Ok('0'),
-                    'R' => Ok('1'),
-                    c => bail!("invalid character: {}", c),
-                })
-                .collect::<Result<String, _>>()?,
-            2,
-        )?;
+        let column = parts.1.chars().try_fold(0u8, |result, c| match c {
+            'L' => Ok(result.wrapping_shl(1) | 0),
+            'R' => Ok(result.wrapping_shl(1) | 1),
+            _ => bail!("invalid character in column: {}", c),
+        })?;
 
         Ok(Seat { row, column })
     }
