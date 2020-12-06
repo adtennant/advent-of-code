@@ -7,3 +7,4 @@
 | [Day 3: Toboggan Trajectory](./day-03) | 🌟🌟  |
 | [Day 4: Passport Processing](./day-04) | 🌟🌟  |
 | [Day 5: Binary Boarding](./day-05)     | 🌟🌟  |
+| [Day 6: Custom Customs](./day-06)      | 🌟🌟  |

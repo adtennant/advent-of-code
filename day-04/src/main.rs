@@ -69,9 +69,10 @@ impl<'a> Passport<'a> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Passport>> {
-    let regex = Regex::new("\n *\n")?;
-
-    regex.split(input).map(Passport::try_from).collect()
+    Regex::new("\n *\n")?
+        .split(input)
+        .map(Passport::try_from)
+        .collect()
 }
 
 fn main() -> Result<()> {
