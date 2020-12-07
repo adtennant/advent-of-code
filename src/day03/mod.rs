@@ -55,22 +55,22 @@ impl Grid {
     }
 }
 
-fn main() -> Result<()> {
-    println!("Day 3: Toboggan Trajectory");
+#[aoc_generator(day3)]
+fn generator(input: &str) -> Result<Grid> {
+    Grid::from_str(&input)
+}
 
-    let grid = Grid::from_str(include_str!("../input.txt"))?;
+#[aoc(day3, part1)]
+fn part1(input: &Grid) -> usize {
+    input.count_trees_for_trajectory(3, 1)
+}
 
-    println!("Part 1: {:?}", grid.count_trees_for_trajectory(3, 1));
-
-    println!(
-        "Part 2: {:?}",
-        [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
-            .iter()
-            .map(|&(right, down)| grid.count_trees_for_trajectory(right, down))
-            .product::<usize>()
-    );
-
-    Ok(())
+#[aoc(day3, part2)]
+fn part2(input: &Grid) -> usize {
+    [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
+        .iter()
+        .map(|&(right, down)| input.count_trees_for_trajectory(right, down))
+        .product()
 }
 
 #[cfg(test)]

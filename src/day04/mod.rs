@@ -1,26 +1,27 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use itertools::Itertools;
 use regex::Regex;
-use std::{collections::HashMap, convert::TryFrom};
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, PartialEq)]
-struct Passport<'a>(HashMap<&'a str, &'a str>);
+struct Passport(HashMap<String, String>);
 
-impl<'a> TryFrom<&'a str> for Passport<'a> {
-    type Error = anyhow::Error;
+impl FromStr for Passport {
+    type Err = anyhow::Error;
 
-    fn try_from(s: &'a str) -> Result<Self, Self::Error> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let passport: HashMap<_, _> = s
             .split_whitespace()
             .flat_map(|p| p.split(':'))
             .tuples()
+            .map(|(k, v)| (String::from(k), String::from(v)))
             .collect();
 
         Ok(Passport(passport))
     }
 }
 
-impl<'a> Passport<'a> {
+impl Passport {
     fn has_required_fields(&self) -> bool {
         ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
             .iter()
@@ -32,7 +33,7 @@ impl<'a> Passport<'a> {
             return false;
         }
 
-        self.0.iter().all(|(&k, &v)| match k {
+        self.0.iter().all(|(k, v)| match k.as_str() {
             "byr" => v
                 .parse::<i32>()
                 .map(|v| (1920..=2002).contains(&v))
@@ -61,39 +62,32 @@ impl<'a> Passport<'a> {
                     && v.len() == 7
                     && v.chars().skip(1).all(|c| c.to_digit(16).is_some())
             }
-            "ecl" => ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&v),
+            "ecl" => ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&v.as_str()),
             "pid" => v.len() == 9 && v.chars().all(|c| c.is_numeric()),
             _ => true,
         })
     }
 }
 
-fn parse_input(input: &str) -> Result<Vec<Passport>> {
+#[aoc_generator(day4)]
+fn generator(input: &str) -> Result<Vec<Passport>> {
     Regex::new("\n *\n")?
         .split(input)
-        .map(Passport::try_from)
+        .map(Passport::from_str)
         .collect()
 }
 
-fn main() -> Result<()> {
-    println!("Day 4: Passport Processing");
+#[aoc(day4, part1)]
+fn part1(input: &[Passport]) -> usize {
+    input
+        .iter()
+        .filter(|passport| passport.has_required_fields())
+        .count()
+}
 
-    let input = parse_input(include_str!("../input.txt"))?;
-
-    println!(
-        "Part 1: {}",
-        input
-            .iter()
-            .filter(|passport| passport.has_required_fields())
-            .count()
-    );
-
-    println!(
-        "Part 2: {}",
-        input.iter().filter(|passport| passport.is_valid()).count()
-    );
-
-    Ok(())
+#[aoc(day4, part2)]
+fn part2(input: &[Passport]) -> usize {
+    input.iter().filter(|passport| passport.is_valid()).count()
 }
 
 #[cfg(test)]
@@ -106,7 +100,7 @@ mod tests {
             ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
             byr:1937 iyr:2017 cid:147 hgt:183cm
         ";
-        let passport = Passport::try_from(data).unwrap();
+        let passport = Passport::from_str(data).unwrap();
 
         assert_eq!(
             Passport(
@@ -122,6 +116,7 @@ mod tests {
                 ]
                 .iter()
                 .cloned()
+                .map(|(k, v)| (String::from(k), String::from(v)))
                 .collect()
             ),
             passport
@@ -145,7 +140,7 @@ mod tests {
             iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
 
         assert_eq!(4, input.len())
     }
@@ -168,7 +163,7 @@ mod tests {
             pid:3556412378 byr:2007
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
 
         assert_eq!(
             0,
@@ -190,7 +185,7 @@ mod tests {
             iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
 
         assert_eq!(
             4,

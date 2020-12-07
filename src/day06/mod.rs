@@ -3,18 +3,24 @@ use itertools::Itertools;
 use regex::Regex;
 use std::collections::HashSet;
 
-fn parse_input(input: &str) -> Result<Vec<&str>> {
-    Ok(Regex::new("\n *\n")?.split(input).collect())
+#[aoc_generator(day6)]
+fn generator(input: &str) -> Result<Vec<String>> {
+    Ok(Regex::new("\n *\n")?
+        .split(input)
+        .map(String::from)
+        .collect())
 }
 
-fn count_anyone(input: &[&str]) -> usize {
+#[aoc(day6, part1)]
+fn part1(input: &[String]) -> usize {
     input
         .iter()
         .map(|s| s.chars().filter(|c| !c.is_whitespace()).unique().count())
         .sum::<usize>()
 }
 
-fn count_everyone(input: &[&str]) -> usize {
+#[aoc(day6, part2)]
+fn part2(input: &[String]) -> usize {
     input
         .iter()
         .map(|s| {
@@ -24,18 +30,6 @@ fn count_everyone(input: &[&str]) -> usize {
         })
         .map(|s| s.unwrap_or_default().len())
         .sum::<usize>()
-}
-
-fn main() -> Result<()> {
-    println!("Day 6: Custom Customs");
-
-    let input = parse_input(include_str!("../input.txt"))?;
-
-    println!("Part 1: {:?}", count_anyone(&input));
-
-    println!("Part 2: {:?}", count_everyone(&input));
-
-    Ok(())
 }
 
 #[cfg(test)]
@@ -61,7 +55,7 @@ mod tests {
 
             b
         ";
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
         assert_eq!(5, input.len())
     }
 
@@ -84,8 +78,8 @@ mod tests {
 
             b
         ";
-        let input = parse_input(data).unwrap();
-        assert_eq!(11, count_anyone(&input))
+        let input = generator(data).unwrap();
+        assert_eq!(11, part1(&input))
     }
 
     #[test]
@@ -107,7 +101,7 @@ mod tests {
 
             b
         ";
-        let input = parse_input(data).unwrap();
-        assert_eq!(6, count_everyone(&input))
+        let input = generator(data).unwrap();
+        assert_eq!(6, part2(&input))
     }
 }

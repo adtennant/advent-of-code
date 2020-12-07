@@ -43,7 +43,8 @@ impl PasswordEntry {
     }
 }
 
-fn parse_input(data: &str) -> Result<Vec<PasswordEntry>> {
+#[aoc_generator(day2)]
+fn generator(data: &str) -> Result<Vec<PasswordEntry>> {
     data.lines()
         .map(|line| line.trim())
         .filter(|line| !line.is_empty())
@@ -51,28 +52,20 @@ fn parse_input(data: &str) -> Result<Vec<PasswordEntry>> {
         .collect()
 }
 
-fn main() -> Result<()> {
-    println!("Day 2: Password Philosophy");
+#[aoc(day2, part1)]
+fn part1(input: &[PasswordEntry]) -> usize {
+    input
+        .iter()
+        .filter(|entry| entry.matches_corporate_policy())
+        .count()
+}
 
-    let input = parse_input(include_str!("../input.txt"))?;
-
-    println!(
-        "Part 1: {:?}",
-        input
-            .iter()
-            .filter(|entry| entry.matches_corporate_policy())
-            .count()
-    );
-
-    println!(
-        "Part 2: {:?}",
-        input
-            .iter()
-            .filter(|entry| entry.matches_authentication_system())
-            .count()
-    );
-
-    Ok(())
+#[aoc(day2, part2)]
+fn part2(input: &[PasswordEntry]) -> usize {
+    input
+        .iter()
+        .filter(|entry| entry.matches_authentication_system())
+        .count()
 }
 
 #[cfg(test)]
@@ -156,7 +149,7 @@ mod tests {
             2-9 c: ccccccccc
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
 
         assert_eq!(
             vec![

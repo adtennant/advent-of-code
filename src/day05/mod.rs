@@ -36,7 +36,8 @@ impl Seat {
     }
 }
 
-fn parse_input(data: &str) -> Result<Vec<Seat>> {
+#[aoc_generator(day5)]
+fn generator(data: &str) -> Result<Vec<Seat>> {
     data.lines()
         .map(|line| line.trim())
         .filter(|line| !line.is_empty())
@@ -44,23 +45,19 @@ fn parse_input(data: &str) -> Result<Vec<Seat>> {
         .collect()
 }
 
-fn main() -> Result<()> {
-    println!("Day 5: Binary Boarding");
+#[aoc(day5, part1)]
+fn part1(input: &[Seat]) -> Option<u16> {
+    input.iter().map(|s| s.id()).max()
+}
 
-    let input = parse_input(include_str!("../input.txt"))?;
-
-    println!("Part 1: {:?}", input.iter().map(|s| s.id()).max());
-    println!(
-        "Part 2: {:?}",
-        input
-            .iter()
-            .map(|s| s.id())
-            .sorted()
-            .tuple_windows::<(_, _)>()
-            .find_map(|(s1, s2)| if s1 + 2 == s2 { Some(s1 + 1) } else { None })
-    );
-
-    Ok(())
+#[aoc(day5, part2)]
+fn part2(input: &[Seat]) -> Option<u16> {
+    input
+        .iter()
+        .map(|s| s.id())
+        .sorted()
+        .tuple_windows::<(_, _)>()
+        .find_map(|(s1, s2)| if s1 + 2 == s2 { Some(s1 + 1) } else { None })
 }
 
 #[cfg(test)]

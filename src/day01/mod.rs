@@ -1,13 +1,5 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::{collections::HashSet, num::ParseIntError};
-
-fn parse_input(data: &str) -> Result<HashSet<i32>, ParseIntError> {
-    data.lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
-        .map(|line| line.parse::<i32>())
-        .collect()
-}
 
 fn find_pair(input: &HashSet<i32>, total: i32) -> Option<i32> {
     input.iter().find_map(|x| {
@@ -22,22 +14,23 @@ fn find_triple(input: &HashSet<i32>, total: i32) -> Option<i32> {
         .find_map(|x| find_pair(input, total - x).map(|result| x * result))
 }
 
-fn main() -> Result<()> {
-    println!("Day 1: Report Repair");
+#[aoc_generator(day1)]
+pub fn generator(data: &str) -> Result<HashSet<i32>, ParseIntError> {
+    data.lines()
+        .map(|line| line.trim())
+        .filter(|line| !line.is_empty())
+        .map(|line| line.parse::<i32>())
+        .collect()
+}
 
-    let input = parse_input(include_str!("../input.txt"))?;
+#[aoc(day1, part1)]
+pub fn part1(input: &HashSet<i32>) -> Option<i32> {
+    find_pair(input, 2020)
+}
 
-    println!(
-        "Part 1: {:?}",
-        find_pair(&input, 2020).with_context(|| "no matching pair found")?
-    );
-
-    println!(
-        "Part 2: {:?}",
-        find_triple(&input, 2020).with_context(|| "no matching triple found")?
-    );
-
-    Ok(())
+#[aoc(day1, part2)]
+pub fn part2(input: &HashSet<i32>) -> Option<i32> {
+    find_triple(&input, 2020)
 }
 
 #[cfg(test)]
@@ -55,7 +48,7 @@ mod tests {
             1456
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
 
         assert_eq!(
             [1721, 979, 366, 299, 675, 1456]
@@ -77,7 +70,7 @@ mod tests {
             1456
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
         let result = find_pair(&input, 2020).unwrap();
 
         assert_eq!(result, 514579)
@@ -94,7 +87,7 @@ mod tests {
             1456
         ";
 
-        let input = parse_input(data).unwrap();
+        let input = generator(data).unwrap();
         let result = find_triple(&input, 2020).unwrap();
 
         assert_eq!(result, 241861950)
