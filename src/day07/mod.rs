@@ -18,7 +18,6 @@ fn count_contents(input: &HashMap<String, Vec<(usize, String)>>, color: &str) ->
         .get(color)
         .unwrap()
         .iter()
-        .cloned()
         .map(|(number, color)| number * count_contents(input, &color))
         .sum::<usize>()
         + 1
