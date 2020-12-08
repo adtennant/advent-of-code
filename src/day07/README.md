@@ -24,10 +24,10 @@ You have a **`shiny gold`** bag. If you wanted to carry it in at least one other
 
 In the above rules, the following options would be available to you:
 
-    * A `bright white` bag, which can hold your `shiny gold` bag directly.
-    * A `muted yellow` bag, which can hold your `shiny gold` bag directly, plus some other bags.
-    * A `dark orange` bag, which can hold `bright white` and `muted yellow` bags, either of which could then hold your `shiny gold` bag.
-    * A `light red` bag, which can hold `bright white` and `muted yellow` bags, either of which could then hold your `shiny gold` bag.
+- A `bright white` bag, which can hold your `shiny gold` bag directly.
+- A `muted yellow` bag, which can hold your `shiny gold` bag directly, plus some other bags.
+- A `dark orange` bag, which can hold `bright white` and `muted yellow` bags, either of which could then hold your `shiny gold` bag.
+- A `light red` bag, which can hold `bright white` and `muted yellow` bags, either of which could then hold your `shiny gold` bag.
 
 So, in this example, the number of bag colors that can eventually contain at least one `shiny gold` bag is **`4`**.
 
@@ -39,10 +39,10 @@ It's getting pretty expensive to fly these days - not because of ticket prices, 
 
 Consider again your `shiny gold` bag and the rules from the above example:
 
-    * `faded blue` bags contain `0` other bags.
-    * `dotted black` bags contain `0` other bags.
-    * `vibrant plum` bags contain `11` other bags: 5 `faded blue` bags and 6 `dotted black` bags.
-    * `dark olive` bags contain `7` other bags: 3 `faded blue` bags and 4 `dotted black` bags.
+- `faded blue` bags contain `0` other bags.
+- `dotted black` bags contain `0` other bags.
+- `vibrant plum` bags contain `11` other bags: 5 `faded blue` bags and 6 `dotted black` bags.
+- `dark olive` bags contain `7` other bags: 3 `faded blue` bags and 4 `dotted black` bags.
 
 So, a single `shiny gold` bag must contain 1 `dark olive` bag (and the 7 bags within it) plus 2 `vibrant plum` bags (and the 11 bags within **each** of those): `1 + 1*7 + 2 + 2*11` = **`32`** bags!
 
