@@ -4,7 +4,7 @@ import readInput
 
 fun main() {
     fun getTotals(input: List<String>): List<Int> {
-        val elves = input.joinToString("\n").split("\n\n");
+        val elves = input.joinToString("\n").split("\n\n")
         return elves.map { it.split("\n").map(String::toInt).sum() }
     }
 
