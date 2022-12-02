@@ -63,7 +63,7 @@ class DynamicRound(private val player: Choice, private val opponent: Choice) {
 }
 
 fun String.toDynamicRound() =
-    split(" ", limit = 2).windowed(2, 2).map { DynamicRound(it[1].toChoice(), it[0].toChoice()) }.first()
+    split(" ", limit = 2).windowed(2, 2).firstNotNullOf { DynamicRound(it[1].toChoice(), it[0].toChoice()) }
 
 class FixedRound(private val opponent: Choice, private val outcome: Outcome) {
     private val player
@@ -90,7 +90,7 @@ class FixedRound(private val opponent: Choice, private val outcome: Outcome) {
 }
 
 fun String.toFixedRound() =
-    split(" ", limit = 2).windowed(2, 2).map { FixedRound(it[0].toChoice(), it[1].toOutcome()) }.first()
+    split(" ", limit = 2).windowed(2, 2).firstNotNullOf { FixedRound(it[0].toChoice(), it[1].toOutcome()) }
 
 fun main() {
     fun part1(input: List<String>) = input.map { it.toDynamicRound() }.sumOf { it.score }
