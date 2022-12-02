@@ -5,7 +5,7 @@ import java.security.MessageDigest
 /**
  * Reads lines from the given input txt file.
  */
-fun readInput(name: String) = File("src", "$name.txt")
+fun readInput(name: String) = File("src/dev/adtennant/adventofcode", "$name.txt")
     .readLines()
 
 /**
@@ -14,3 +14,12 @@ fun readInput(name: String) = File("src", "$name.txt")
 fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray()))
     .toString(16)
     .padStart(32, '0')
+
+/**
+ * Takes exactly n elements from a Collection. Throws if n != size.
+ */
+fun <E> Collection<E>.takeExact(n: Int) = if (size == n) {
+    this
+} else {
+    error("collection is not $n elements in size")
+}
