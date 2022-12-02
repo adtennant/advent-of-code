@@ -20,3 +20,5 @@ Collect stars by solving puzzles. Two puzzles will be made available on each day
 | [Day 6: Custom Customs](./src/day06)      | 🌟🌟  |
 | [Day 7: Handy Haversacks](./src/day07)    | 🌟🌟  |
 | [Day 8: Handheld Halting](./src/day08)    | 🌟🌟  |
+| [Day 9: Encoding Error](./src/day09)      | 🌟🌟  |
+| [Day 10: Adapter Array](./src/day10)      | 🌟🌟  |
