@@ -15,7 +15,8 @@ Collect stars by solving puzzles. Two puzzles will be made available on each day
 puzzle is unlocked when you complete the first. Each puzzle grants _one star_. Good luck!
 
 | Day                                                                      | Stars |
-|--------------------------------------------------------------------------| ----- |
+| ------------------------------------------------------------------------ | ----- |
 | [Day 1: Calorie Counting](./src/dev/adtennant/adventofcode/day01)        | 🌟🌟  |
 | [Day 2: Rock Paper Scissors](./src/dev/adtennant/adventofcode/day02)     | 🌟🌟  |
 | [Day 3: Rucksack Reorganization](./src/dev/adtennant/adventofcode/day03) | 🌟🌟  |
+| [Day 4: Camp Cleanup](./src/dev/adtennant/adventofcode/day04)            | 🌟🌟  |
