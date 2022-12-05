@@ -1,6 +1,5 @@
+use anyhow::{bail, Context, Result};
 use std::{convert::TryFrom, str::FromStr};
-
-use anyhow::{bail, Result};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Tile {
@@ -21,49 +20,48 @@ impl TryFrom<char> for Tile {
     }
 }
 
-impl Tile {
-    fn next(self, neighbours: &[Tile]) -> Tile {
-        let occupied_neighbours = neighbours
-            .iter()
-            .filter(|n| matches!(n, Tile::Seat(true)))
-            .count();
-
-        match self {
-            Tile::Seat(false) if occupied_neighbours == 0 => Tile::Seat(true),
-            Tile::Seat(true) if occupied_neighbours >= 4 => Tile::Seat(false),
-            _ => self,
-        }
-    }
-}
-
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct Grid(Vec<Vec<Tile>>);
+struct Grid {
+    width: usize,
+    height: usize,
+    tiles: Vec<Tile>,
+}
 
 impl FromStr for Grid {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self> {
+        let width = s
+            .lines()
+            .next()
+            .context("couldn't determine grid width")?
+            .len();
+        let height = s.lines().count();
+
         s.lines()
-            .map(|line| line.chars().map(Tile::try_from).collect())
+            .flat_map(str::chars)
+            .map(Tile::try_from)
             .collect::<Result<_, _>>()
-            .map(Grid)
+            .map(|tiles| Grid {
+                width,
+                height,
+                tiles,
+            })
     }
 }
 
 impl Grid {
     fn get(&self, x: i32, y: i32) -> Option<Tile> {
-        if x >= 0 && x < self.width() && y >= 0 && y < self.height() {
-            Some(self.0[y as usize][x as usize])
-        } else {
-            None
-        }
+        let x = usize::try_from(x).ok()?;
+        let y = usize::try_from(y).ok()?;
+
+        (x < self.width && y < self.height).then(|| self.tiles[y * self.width + x])
     }
 
-    fn height(&self) -> i32 {
-        self.0.len() as i32
-    }
+    fn neighbouring_seats(&self, index: usize) -> impl Iterator<Item = Tile> + '_ {
+        let y = (index / self.width) as i32;
+        let x = (index % self.width) as i32;
 
-    fn neighbours(&self, x: usize, y: usize) -> Vec<Tile> {
         [
             (-1, -1),
             (-1, 0),
@@ -75,44 +73,96 @@ impl Grid {
             (1, 1),
         ]
         .iter()
-        .map(|(dx, dy)| (x as i32 + dx, y as i32 + dy))
-        .filter_map(|(x, y)| self.get(x, y))
-        .collect()
+        .map(move |(dx, dy)| (x + dx, y + dy))
+        .filter_map(move |(x, y)| self.get(x, y))
     }
 
-    fn occupied(&self) -> usize {
-        self.0
+    fn occupied_seats(&self) -> usize {
+        self.tiles
             .iter()
-            .flatten()
-            .filter(|&&tile| tile == Tile::Seat(true))
+            .filter(|tile| matches!(tile, Tile::Seat(true)))
             .count()
     }
 
-    fn width(&self) -> i32 {
-        if !self.0.is_empty() {
-            self.0[0].len() as i32
+    fn visible_seats(&self, index: usize) -> impl Iterator<Item = Tile> + '_ {
+        let y = (index / self.width) as i32;
+        let x = (index % self.width) as i32;
+
+        [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ]
+        .iter()
+        .map(move |(dx, dy)| {
+            itertools::iterate((x + dx, y + dy), move |(x, y)| (x + dx, y + dy))
+                .map_while(move |(x, y)| self.get(x, y))
+                .skip_while(|t| matches!(t, Tile::Floor))
+                .take(1)
+        })
+        .flatten()
+    }
+
+    fn into_iter(self, f: fn(&Grid, usize, Tile) -> Tile) -> GridIterator {
+        GridIterator { current: self, f }
+    }
+}
+
+struct GridIterator {
+    current: Grid,
+    f: fn(&Grid, usize, Tile) -> Tile,
+}
+
+impl Iterator for GridIterator {
+    type Item = Grid;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next_tiles = self
+            .current
+            .tiles
+            .iter()
+            .enumerate()
+            .map(|(index, &tile)| (self.f)(&self.current, index, tile))
+            .collect();
+
+        if self.current.tiles != next_tiles {
+            self.current.tiles = next_tiles;
+            Some(self.current.clone())
         } else {
-            0
+            None
         }
     }
 }
 
-fn process_round(grid: &Grid) -> Grid {
-    Grid(
-        grid.0
-            .iter()
-            .enumerate()
-            .map(|(y, row)| {
-                row.iter()
-                    .enumerate()
-                    .map(|(x, &tile)| {
-                        let neighbours = grid.neighbours(x, y);
-                        tile.next(&neighbours)
-                    })
-                    .collect()
-            })
-            .collect(),
-    )
+fn part1_visibility(grid: &Grid, index: usize, tile: Tile) -> Tile {
+    let occupied = grid
+        .neighbouring_seats(index)
+        .filter(|n| matches!(n, Tile::Seat(true)))
+        .count();
+
+    match tile {
+        Tile::Seat(false) if occupied == 0 => Tile::Seat(true),
+        Tile::Seat(true) if occupied >= 4 => Tile::Seat(false),
+        _ => tile,
+    }
+}
+
+fn part2_visibility(grid: &Grid, index: usize, tile: Tile) -> Tile {
+    let occupied = grid
+        .visible_seats(index)
+        .filter(|n| matches!(n, Tile::Seat(true)))
+        .count();
+
+    match tile {
+        Tile::Seat(false) if occupied == 0 => Tile::Seat(true),
+        Tile::Seat(true) if occupied >= 5 => Tile::Seat(false),
+        _ => tile,
+    }
 }
 
 #[aoc_generator(day11)]
@@ -121,38 +171,50 @@ fn generator(input: &str) -> Result<Grid> {
 }
 
 #[aoc(day11, part1)]
-fn part1(data: &Grid) -> usize {
-    let mut old = data.clone();
-
-    loop {
-        let new = process_round(&old);
-
-        if new == old {
-            return new.occupied();
-        }
-
-        old = new;
-    }
+fn part1(data: &Grid) -> Option<usize> {
+    data.clone()
+        .into_iter(part1_visibility)
+        .last()
+        .map(|grid| grid.occupied_seats())
 }
 
 #[aoc(day11, part2)]
-fn part2(data: &Grid) -> usize {
-    unimplemented!()
+fn part2(data: &Grid) -> Option<usize> {
+    data.clone()
+        .into_iter(part2_visibility)
+        .last()
+        .map(|grid| grid.occupied_seats())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
     use Tile::*;
-
-    const DATA: &'static str = "L.LL.LL.LL\nLLLLLLL.LL\nL.L.L..L..\nLLLL.LL.LL\nL.LL.LL.LL\nL.LLLLL.LL\n..L.L.....\nLLLLLLLLLL\nL.LLLLLL.L\nL.LLLLL.LL";
 
     #[test]
     fn it_parses_input() {
-        let data = generator(DATA).expect("input to be parsed");
+        let data = generator(indoc!(
+            "
+            L.LL.LL.LL
+            LLLLLLL.LL
+            L.L.L..L..
+            LLLL.LL.LL
+            L.LL.LL.LL
+            L.LLLLL.LL
+            ..L.L.....
+            LLLLLLLLLL
+            L.LLLLLL.L
+            L.LLLLL.LL
+            "
+        ))
+        .expect("input to be parsed");
+
         assert_eq!(
-            Grid(vec![
-                vec![
+            Grid {
+                width: 10,
+                height: 10,
+                tiles: vec![
                     Seat(false),
                     Floor,
                     Seat(false),
@@ -162,9 +224,7 @@ mod tests {
                     Seat(false),
                     Floor,
                     Seat(false),
-                    Seat(false)
-                ],
-                vec![
+                    Seat(false),
                     Seat(false),
                     Seat(false),
                     Seat(false),
@@ -174,9 +234,7 @@ mod tests {
                     Seat(false),
                     Floor,
                     Seat(false),
-                    Seat(false)
-                ],
-                vec![
+                    Seat(false),
                     Seat(false),
                     Floor,
                     Seat(false),
@@ -186,9 +244,7 @@ mod tests {
                     Floor,
                     Seat(false),
                     Floor,
-                    Floor
-                ],
-                vec![
+                    Floor,
                     Seat(false),
                     Seat(false),
                     Seat(false),
@@ -198,11 +254,6 @@ mod tests {
                     Seat(false),
                     Floor,
                     Seat(false),
-                    Seat(false)
-                ],
-                vec![
-                    Seat(false),
-                    Floor,
                     Seat(false),
                     Seat(false),
                     Floor,
@@ -210,9 +261,10 @@ mod tests {
                     Seat(false),
                     Floor,
                     Seat(false),
-                    Seat(false)
-                ],
-                vec![
+                    Seat(false),
+                    Floor,
+                    Seat(false),
+                    Seat(false),
                     Seat(false),
                     Floor,
                     Seat(false),
@@ -222,9 +274,7 @@ mod tests {
                     Seat(false),
                     Floor,
                     Seat(false),
-                    Seat(false)
-                ],
-                vec![
+                    Seat(false),
                     Floor,
                     Floor,
                     Seat(false),
@@ -234,9 +284,7 @@ mod tests {
                     Floor,
                     Floor,
                     Floor,
-                    Floor
-                ],
-                vec![
+                    Floor,
                     Seat(false),
                     Seat(false),
                     Seat(false),
@@ -246,9 +294,7 @@ mod tests {
                     Seat(false),
                     Seat(false),
                     Seat(false),
-                    Seat(false)
-                ],
-                vec![
+                    Seat(false),
                     Seat(false),
                     Floor,
                     Seat(false),
@@ -258,9 +304,7 @@ mod tests {
                     Seat(false),
                     Seat(false),
                     Floor,
-                    Seat(false)
-                ],
-                vec![
+                    Seat(false),
                     Seat(false),
                     Floor,
                     Seat(false),
@@ -272,659 +316,259 @@ mod tests {
                     Seat(false),
                     Seat(false)
                 ]
-            ]),
+            },
             data
         );
     }
 
     #[test]
     fn it_solves_part1() {
-        let data = generator(DATA).expect("input to be parsed");
-        let result = process_round(&data);
+        let data = generator(indoc!(
+            "
+            L.LL.LL.LL
+            LLLLLLL.LL
+            L.L.L..L..
+            LLLL.LL.LL
+            L.LL.LL.LL
+            L.LLLLL.LL
+            ..L.L.....
+            LLLLLLLLLL
+            L.LLLLLL.L
+            L.LLLLL.LL
+            "
+        ))
+        .expect("input to be parsed");
+
+        let mut grid = data.into_iter(part1_visibility);
 
         assert_eq!(
-            Grid(vec![
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Floor,
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ]
-            ]),
-            result
+            generator(indoc!(
+                "
+                #.##.##.##
+                #######.##
+                #.#.#..#..
+                ####.##.##
+                #.##.##.##
+                #.#####.##
+                ..#.#.....
+                ##########
+                #.######.#
+                #.#####.##
+                "
+            ))
+            .ok(),
+            grid.next()
         );
-
-        let result = process_round(&result);
 
         assert_eq!(
-            Grid(vec![
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Floor,
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ]
-            ]),
-            result
+            generator(indoc!(
+                "
+                #.LL.L#.##
+                #LLLLLL.L#
+                L.L.L..L..
+                #LLL.LL.L#
+                #.LL.LL.LL
+                #.LLLL#.##
+                ..L.L.....
+                #LLLLLLLL#
+                #.LLLLLL.L
+                #.#LLLL.##
+                "
+            ))
+            .ok(),
+            grid.next()
         );
-
-        let result = process_round(&result);
 
         assert_eq!(
-            Grid(vec![
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(false),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Floor,
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Seat(false),
-                    Floor,
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-            ]),
-            result
+            generator(indoc!(
+                "
+                #.##.L#.##
+                #L###LL.L#
+                L.#.#..#..
+                #L##.##.L#
+                #.##.LL.LL
+                #.###L#.##
+                ..#.#.....
+                #L######L#
+                #.LL###L.L
+                #.#L###.##
+                "
+            ))
+            .ok(),
+            grid.next()
         );
-
-        let result = process_round(&result);
 
         assert_eq!(
-            Grid(vec![
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Floor,
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-            ]),
-            result
+            generator(indoc!(
+                "
+                #.#L.L#.##
+                #LLL#LL.L#
+                L.L.L..#..
+                #LLL.##.L#
+                #.LL.LL.LL
+                #.LL#L#.##
+                ..L.L.....
+                #L#LLLL#L#
+                #.LLLLLL.L
+                #.#L#L#.##
+                "
+            ))
+            .ok(),
+            grid.next()
         );
-
-        let result = process_round(&result);
 
         assert_eq!(
-            Grid(vec![
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(false),
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor,
-                    Seat(true),
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-                vec![
-                    Floor,
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Seat(false),
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor,
-                    Floor
-                ],
-                vec![
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Seat(false),
-                    Floor,
-                    Seat(false)
-                ],
-                vec![
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Seat(false),
-                    Seat(true),
-                    Floor,
-                    Seat(true),
-                    Seat(true)
-                ],
-            ]),
-            result
+            generator(indoc!(
+                "
+                #.#L.L#.##
+                #LLL#LL.L#
+                L.#.L..#..
+                #L##.##.L#
+                #.#L.LL.LL
+                #.#L#L#.##
+                ..L.L.....
+                #L#L##L#L#
+                #.LLLLLL.L
+                #.#L#L#.##
+                "
+            ))
+            .ok(),
+            grid.next()
         );
-
-        assert_eq!(result.occupied(), 37);
     }
 
     #[test]
     fn it_solves_part2() {
-        let data = generator(DATA).expect("input to be parsed");
+        let data = generator(indoc!(
+            "
+            L.LL.LL.LL
+            LLLLLLL.LL
+            L.L.L..L..
+            LLLL.LL.LL
+            L.LL.LL.LL
+            L.LLLLL.LL
+            ..L.L.....
+            LLLLLLLLLL
+            L.LLLLLL.L
+            L.LLLLL.LL
+            "
+        ))
+        .expect("input to be parsed");
+
+        let mut grid = data.into_iter(part2_visibility);
+
+        assert_eq!(
+            generator(indoc!(
+                "
+                #.##.##.##
+                #######.##
+                #.#.#..#..
+                ####.##.##
+                #.##.##.##
+                #.#####.##
+                ..#.#.....
+                ##########
+                #.######.#
+                #.#####.##
+                "
+            ))
+            .ok(),
+            grid.next()
+        );
+
+        assert_eq!(
+            generator(indoc!(
+                "
+                #.LL.LL.L#
+                #LLLLLL.LL
+                L.L.L..L..
+                LLLL.LL.LL
+                L.LL.LL.LL
+                L.LLLLL.LL
+                ..L.L.....
+                LLLLLLLLL#
+                #.LLLLLL.L
+                #.LLLLL.L#
+                "
+            ))
+            .ok(),
+            grid.next()
+        );
+
+        assert_eq!(
+            generator(indoc!(
+                "
+                #.L#.##.L#
+                #L#####.LL
+                L.#.#..#..
+                ##L#.##.##
+                #.##.#L.##
+                #.#####.#L
+                ..#.#.....
+                LLL####LL#
+                #.L#####.L
+                #.L####.L#
+                "
+            ))
+            .ok(),
+            grid.next()
+        );
+
+        assert_eq!(
+            generator(indoc!(
+                "
+                #.L#.L#.L#
+                #LLLLLL.LL
+                L.L.L..#..
+                ##LL.LL.L#
+                L.LL.LL.L#
+                #.LLLLL.LL
+                ..L.L.....
+                LLLLLLLLL#
+                #.LLLLL#.L
+                #.L#LL#.L#
+                "
+            ))
+            .ok(),
+            grid.next()
+        );
+
+        assert_eq!(
+            generator(indoc!(
+                "
+                #.L#.L#.L#
+                #LLLLLL.LL
+                L.L.L..#..
+                ##L#.#L.L#
+                L.L#.#L.L#
+                #.L####.LL
+                ..#.#.....
+                LLL###LLL#
+                #.LLLLL#.L
+                #.L#LL#.L#
+                "
+            ))
+            .ok(),
+            grid.next()
+        );
+
+        assert_eq!(
+            generator(indoc!(
+                "
+                #.L#.L#.L#
+                #LLLLLL.LL
+                L.L.L..#..
+                ##L#.#L.L#
+                L.L#.LL.L#
+                #.LLLL#.LL
+                ..#.L.....
+                LLL###LLL#
+                #.LLLLL#.L
+                #.L#LL#.L#
+                "
+            ))
+            .ok(),
+            grid.next()
+        );
     }
 }
