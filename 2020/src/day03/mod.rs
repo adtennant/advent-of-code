@@ -28,8 +28,6 @@ impl FromStr for Grid {
     fn from_str(s: &str) -> Result<Self> {
         Ok(Grid(
             s.lines()
-                .map(|line| line.trim())
-                .filter(|line| !line.is_empty())
                 .map(|line| line.chars().map(Tile::try_from).collect())
                 .collect::<Result<_, _>>()?,
         ))
@@ -76,10 +74,11 @@ fn part2(input: &Grid) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
 
     #[test]
     fn it_parses_a_grid() {
-        let data = "
+        let data = indoc! {"
             ..##.......
             #...#...#..
             .#....#..#.
@@ -91,7 +90,7 @@ mod tests {
             #.##...#...
             #...##....#
             .#..#...#.#
-        ";
+        "};
         let grid = Grid::from_str(data).unwrap();
 
         assert_eq!(
@@ -246,7 +245,7 @@ mod tests {
 
     #[test]
     fn it_counts_trees_for_a_trajectory() {
-        let data = "
+        let data = indoc! {"
             ..##.......
             #...#...#..
             .#....#..#.
@@ -258,7 +257,7 @@ mod tests {
             #.##...#...
             #...##....#
             .#..#...#.#
-        ";
+        "};
         let grid = Grid::from_str(data).unwrap();
 
         assert_eq!(2, grid.count_trees_for_trajectory(1, 1));

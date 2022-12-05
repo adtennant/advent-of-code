@@ -16,11 +16,7 @@ fn find_triple(input: &HashSet<i32>, total: i32) -> Option<i32> {
 
 #[aoc_generator(day1)]
 pub fn generator(data: &str) -> Result<HashSet<i32>, ParseIntError> {
-    data.lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
-        .map(|line| line.parse::<i32>())
-        .collect()
+    data.lines().map(|line| line.parse::<i32>()).collect()
 }
 
 #[aoc(day1, part1)]
@@ -36,17 +32,18 @@ pub fn part2(input: &HashSet<i32>) -> Option<i32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
 
     #[test]
     fn it_parses_input() {
-        let data = "
+        let data = indoc! {"
             1721
             979
             366
             299
             675
             1456
-        ";
+        "};
 
         let input = generator(data).unwrap();
 
@@ -61,14 +58,14 @@ mod tests {
 
     #[test]
     fn it_finds_a_pair() {
-        let data = "
+        let data = indoc! {"
             1721
             979
             366
             299
             675
             1456
-        ";
+        "};
 
         let input = generator(data).unwrap();
         let result = find_pair(&input, 2020).unwrap();
@@ -78,14 +75,14 @@ mod tests {
 
     #[test]
     fn it_finds_a_triple() {
-        let data = "
+        let data = indoc! {"
             1721
             979
             366
             299
             675
             1456
-        ";
+        "};
 
         let input = generator(data).unwrap();
         let result = find_triple(&input, 2020).unwrap();

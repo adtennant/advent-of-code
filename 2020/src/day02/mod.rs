@@ -46,8 +46,6 @@ impl PasswordEntry {
 #[aoc_generator(day2)]
 fn generator(data: &str) -> Result<Vec<PasswordEntry>> {
     data.lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
         .map(|line| PasswordEntry::from_str(line).with_context(|| "parsing input failed"))
         .collect()
 }
@@ -71,6 +69,7 @@ fn part2(input: &[PasswordEntry]) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
 
     #[test]
     fn it_parses_a_password_policy() {
@@ -143,11 +142,11 @@ mod tests {
 
     #[test]
     fn it_parses_input() {
-        let data = "
+        let data = indoc! {"
             1-3 a: abcde
             1-3 b: cdefg
             2-9 c: ccccccccc
-        ";
+        "};
 
         let input = generator(data).unwrap();
 

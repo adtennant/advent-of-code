@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use anyhow::Result;
 use itertools::Itertools;
 
@@ -65,32 +63,99 @@ fn part2(data: &[u64]) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const DATA: &'static str =
-        "35\n20\n15\n25\n47\n40\n62\n55\n65\n95\n102\n117\n150\n182\n127\n219\n299\n277\n309\n576";
+    use indoc::indoc;
 
     #[test]
     fn it_parses_input() {
-        let data = generator(DATA).expect("input to be parsed");
+        let data = indoc! {"
+            35
+            20
+            15
+            25
+            47
+            40
+            62
+            55
+            65
+            95
+            102
+            117
+            150
+            182
+            127
+            219
+            299
+            277
+            309
+            576
+        "};
+
+        let input = generator(data).expect("input to be parsed");
         assert_eq!(
             [
                 35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277,
                 309, 576
             ]
             .to_vec(),
-            data
+            input
         );
     }
 
     #[test]
     fn it_solves_part1() {
-        let data = generator(DATA).expect("input to be parsed");
-        assert_eq!(Some(127), find_invalid(&data, 5));
+        let data = indoc! {"
+            35
+            20
+            15
+            25
+            47
+            40
+            62
+            55
+            65
+            95
+            102
+            117
+            150
+            182
+            127
+            219
+            299
+            277
+            309
+            576
+        "};
+
+        let input = generator(data).expect("input to be parsed");
+        assert_eq!(Some(127), find_invalid(&input, 5));
     }
 
     #[test]
     fn it_solves_part2() {
-        let data = generator(DATA).expect("input to be parsed");
-        assert_eq!(Some((15, 47)), find_contiguous_min_max(&data, 127));
+        let data = indoc! {"
+            35
+            20
+            15
+            25
+            47
+            40
+            62
+            55
+            65
+            95
+            102
+            117
+            150
+            182
+            127
+            219
+            299
+            277
+            309
+            576
+        "};
+
+        let input = generator(data).expect("input to be parsed");
+        assert_eq!(Some((15, 47)), find_contiguous_min_max(&input, 127));
     }
 }

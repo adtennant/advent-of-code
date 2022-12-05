@@ -78,12 +78,7 @@ fn run_until_loop_or_end(rom: &[Instruction]) -> (isize, bool) {
 
 #[aoc_generator(day8)]
 fn generator(input: &str) -> Vec<Instruction> {
-    input
-        .lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
-        .map(|line| line.parse().unwrap())
-        .collect()
+    input.lines().map(|line| line.parse().unwrap()).collect()
 }
 
 #[aoc(day8, part1)]
@@ -113,10 +108,11 @@ fn part2(rom: &[Instruction]) -> Result<isize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
 
     #[test]
     fn it_parses_input() {
-        let data = "
+        let data = indoc! {"
             nop +0
             acc +1
             jmp +4
@@ -126,7 +122,7 @@ mod tests {
             acc +1
             jmp -4
             acc +6
-        ";
+        "};
 
         let input = generator(data);
         assert_eq!(
@@ -184,7 +180,7 @@ mod tests {
 
     #[test]
     fn it_solves_part1() {
-        let data = "
+        let data = indoc! {"
             nop +0
             acc +1
             jmp +4
@@ -194,15 +190,15 @@ mod tests {
             acc +1
             jmp -4
             acc +6
-        ";
-        let input = generator(data);
+        "};
 
+        let input = generator(data);
         assert_eq!(5, part1(&input));
     }
 
     #[test]
     fn it_solves_part2() {
-        let data = "
+        let data = indoc! {"
             nop +0
             acc +1
             jmp +4
@@ -212,9 +208,9 @@ mod tests {
             acc +1
             jmp -4
             acc +6
-        ";
-        let input = generator(data);
+        "};
 
+        let input = generator(data);
         assert_eq!(8, part2(&input).unwrap());
     }
 }

@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use anyhow::Result;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 fn find_differences(data: &[u64]) -> HashMap<u64, usize> {
     let max = data.iter().max().unwrap();
@@ -61,41 +60,149 @@ fn part2(data: &[u64]) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const DATA: &'static str = "16\n10\n15\n5\n1\n11\n7\n19\n6\n12\n4";
-    const DATA_2: &'static str = "28\n33\n18\n42\n31\n14\n46\n20\n48\n47\n24\n23\n49\n45\n19\n38\n39\n11\n1\n32\n25\n35\n8\n17\n7\n9\n4\n2\n34\n10\n3";
+    use indoc::indoc;
 
     #[test]
     fn it_parses_input() {
-        let data = generator(DATA).expect("input to be parsed");
-        assert_eq!([16, 10, 15, 5, 1, 11, 7, 19, 6, 12, 4].to_vec(), data);
+        let data = indoc! {"
+            16
+            10
+            15
+            5
+            1
+            11
+            7
+            19
+            6
+            12
+            4
+        "};
+
+        let input = generator(data).expect("input to be parsed");
+        assert_eq!([16, 10, 15, 5, 1, 11, 7, 19, 6, 12, 4].to_vec(), input);
     }
 
     #[test]
     fn it_solves_part1() {
-        let data = generator(DATA).expect("input to be parsed");
+        let data = indoc! {"
+            16
+            10
+            15
+            5
+            1
+            11
+            7
+            19
+            6
+            12
+            4
+        "};
+
+        let input = generator(data).expect("input to be parsed");
 
         let mut result = HashMap::new();
         result.insert(1, 7);
         result.insert(3, 5);
 
-        assert_eq!(result, find_differences(&data));
+        assert_eq!(result, find_differences(&input));
 
-        let data = generator(DATA_2).expect("input to be parsed");
+        let data = indoc! {"
+            28
+            33
+            18
+            42
+            31
+            14
+            46
+            20
+            48
+            47
+            24
+            23
+            49
+            45
+            19
+            38
+            39
+            11
+            1
+            32
+            25
+            35
+            8
+            17
+            7
+            9
+            4
+            2
+            34
+            10
+            3
+        "};
+
+        let input = generator(data).expect("input to be parsed");
 
         let mut result = HashMap::new();
         result.insert(1, 22);
         result.insert(3, 10);
 
-        assert_eq!(result, find_differences(&data));
+        assert_eq!(result, find_differences(&input));
     }
 
     #[test]
     fn it_solves_part2() {
-        let data = generator(DATA).expect("input to be parsed");
-        assert_eq!(8, find_combinations(&data));
+        let data = indoc! {"
+            16
+            10
+            15
+            5
+            1
+            11
+            7
+            19
+            6
+            12
+            4
+        "};
 
-        let data = generator(DATA_2).expect("input to be parsed");
-        assert_eq!(19208, find_combinations(&data));
+        let input = generator(data).expect("input to be parsed");
+        assert_eq!(8, find_combinations(&input));
+
+        let data = indoc! {"
+            28
+            33
+            18
+            42
+            31
+            14
+            46
+            20
+            48
+            47
+            24
+            23
+            49
+            45
+            19
+            38
+            39
+            11
+            1
+            32
+            25
+            35
+            8
+            17
+            7
+            9
+            4
+            2
+            34
+            10
+            3
+        "};
+
+        let input = generator(data).expect("input to be parsed");
+        assert_eq!(19208, find_combinations(&input));
     }
 }

@@ -54,12 +54,7 @@ fn parse_bag(input: &str) -> (String, Vec<(usize, String)>) {
 
 #[aoc_generator(day7)]
 fn generator(input: &str) -> HashMap<String, Vec<(usize, String)>> {
-    input
-        .lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
-        .map(parse_bag)
-        .collect()
+    input.lines().map(parse_bag).collect()
 }
 
 #[aoc(day7, part1)]
@@ -82,10 +77,11 @@ fn part2(input: &HashMap<String, Vec<(usize, String)>>) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
 
     #[test]
     fn it_solves_part1() {
-        let data = "
+        let data = indoc! {"
             light red bags contain 1 bright white bag, 2 muted yellow bags.
             dark orange bags contain 3 bright white bags, 4 muted yellow bags.
             bright white bags contain 1 shiny gold bag.
@@ -95,14 +91,15 @@ mod tests {
             vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
             faded blue bags contain no other bags.
             dotted black bags contain no other bags.
-        ";
+        "};
+
         let input = generator(data);
         assert_eq!(4, part1(&input));
     }
 
     #[test]
     fn it_solves_part2() {
-        let data = "
+        let data = indoc! {"
             shiny gold bags contain 2 dark red bags.
             dark red bags contain 2 dark orange bags.
             dark orange bags contain 2 dark yellow bags.
@@ -110,7 +107,8 @@ mod tests {
             dark green bags contain 2 dark blue bags.
             dark blue bags contain 2 dark violet bags.
             dark violet bags contain no other bags.
-        ";
+        "};
+
         let input = generator(data);
         assert_eq!(126, part2(&input))
     }
