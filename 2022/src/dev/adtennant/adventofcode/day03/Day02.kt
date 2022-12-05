@@ -32,11 +32,11 @@ class RucksackGroup(private val first: CharArray, private val second: CharArray,
 }
 
 fun main() {
-    fun part1(input: List<String>) = input.map { it.toCharArray() }
+    fun part1(input: List<String>) = input.map(String::toCharArray)
         .map { Rucksack(it) }
         .sumOf { it.commonItem.priority }
 
-    fun part2(input: List<String>) = input.asSequence().map { it.toCharArray() }
+    fun part2(input: List<String>) = input.map(String::toCharArray)
         .windowed(3, 3)
         .map { RucksackGroup(it[0], it[1], it[2]) }
         .sumOf { it.commonItem.priority }

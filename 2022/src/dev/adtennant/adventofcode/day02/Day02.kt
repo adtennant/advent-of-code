@@ -63,9 +63,8 @@ class DynamicRound(private val player: Choice, private val opponent: Choice) {
 }
 
 fun String.toDynamicRound() = split(" ", limit = 2)
-    .windowed(2, 2)
-    .takeExact(1)
-    .firstNotNullOf { DynamicRound(it[1].toChoice(), it[0].toChoice()) }
+    .takeExact(2)
+    .let { DynamicRound(it[1].toChoice(), it[0].toChoice()) }
 
 class FixedRound(private val opponent: Choice, private val outcome: Outcome) {
     private val player
@@ -91,16 +90,15 @@ class FixedRound(private val opponent: Choice, private val outcome: Outcome) {
 }
 
 fun String.toFixedRound() = split(" ", limit = 2)
-    .windowed(2, 2)
-    .takeExact(1)
-    .firstNotNullOf { FixedRound(it[0].toChoice(), it[1].toOutcome()) }
+    .takeExact(2)
+    .let { FixedRound(it[0].toChoice(), it[1].toOutcome()) }
 
 fun main() {
-    fun part1(input: List<String>) = input.map { it.toDynamicRound() }
-        .sumOf { it.score }
+    fun part1(input: List<String>) = input.map(String::toDynamicRound)
+        .sumOf(DynamicRound::score)
 
-    fun part2(input: List<String>) = input.map { it.toFixedRound() }
-        .sumOf { it.score }
+    fun part2(input: List<String>) = input.map(String::toFixedRound)
+        .sumOf(FixedRound::score)
 
     val testInput = readInput("day02/Day02_test")
     check(part1(testInput) == 15)

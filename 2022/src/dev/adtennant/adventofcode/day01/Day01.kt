@@ -1,13 +1,13 @@
 package dev.adtennant.adventofcode.day01
 
 import readInput
+import split
 
 fun main() {
-    fun getTotals(input: List<String>) = input.joinToString("\n")
-        .split("\n\n")
+    fun getTotals(input: List<String>) = input
+        .split(String::isNotEmpty)
         .map {
-            it.split("\n")
-                .map(String::toInt)
+            it.map(String::toInt)
                 .sum()
         }
 
