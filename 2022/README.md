@@ -22,3 +22,5 @@ puzzle is unlocked when you complete the first. Each puzzle grants _one star_. G
 | [Day 4: Camp Cleanup](./src/dev/adtennant/adventofcode/day04)            | 🌟🌟  |
 | [Day 5: Supply Stacks](./src/dev/adtennant/adventofcode/day05)           | 🌟🌟  |
 | [Day 6: Tuning Trouble](./src/dev/adtennant/adventofcode/day06)          | 🌟🌟  |
+| [Day 7: No Space Left On Device](./src/dev/adtennant/adventofcode/day07) | 🌟🌟  |
+| [Day 8: Treetop Tree House](./src/dev/adtennant/adventofcode/day08)      | 🌟🌟  |

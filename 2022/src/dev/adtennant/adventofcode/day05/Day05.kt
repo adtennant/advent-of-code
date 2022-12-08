@@ -11,7 +11,7 @@ val Stacks.message
     get() = map(Stack<Char>::peek)
         .joinToString("")
 
-class Move(val count: Int, val from: Int, val to: Int)
+data class Move(val count: Int, val from: Int, val to: Int)
 
 interface CrateMover {
     fun apply(stacks: Stacks, move: Move): Stacks

@@ -7,13 +7,13 @@ class Assignment(private val first: IntRange, private val second: IntRange) {
     val hasFullOverlap
         get(): Boolean {
             return first.all { second.contains(it) } ||
-                second.all { first.contains(it) }
+                    second.all { first.contains(it) }
         }
 
     val hasPartialOverlap
         get(): Boolean {
             return first.any { second.contains(it) } ||
-                second.any { first.contains(it) }
+                    second.any { first.contains(it) }
         }
 }
 

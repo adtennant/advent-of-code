@@ -9,10 +9,11 @@ fun readInput(name: String) = File("src/dev/adtennant/adventofcode", "$name.txt"
     .readLines()
 
 /**
- * Reads text from the given input txt file.
+ * Reads lines from the given input txt file as text.
  */
 fun readInputAsText(name: String) = File("src/dev/adtennant/adventofcode", "$name.txt")
     .readText()
+
 
 /**
  * Converts string to md5 hash.
@@ -37,7 +38,7 @@ fun <T> Iterable<T>.span(predicate: (T) -> Boolean): Pair<List<T>, List<T>> =
     Pair(takeWhile(predicate), dropWhile(predicate))
 
 /**
- * Splits this iterable into a prefix/suffix pair according to a predicate. Removes the entry matching the predicate.
+ * Splits this iterable into parts according to a predicate. Removes the entry matching the predicate.
  */
 fun <T> Iterable<T>.split(predicate: (T) -> Boolean): List<List<T>> {
     val result = mutableListOf<List<T>>()
@@ -45,10 +46,47 @@ fun <T> Iterable<T>.split(predicate: (T) -> Boolean): List<List<T>> {
 
     while (remainder.toList().isNotEmpty()) {
         val (start, end) = remainder.span(predicate)
-        result.add(start)
+
+        if (start.isNotEmpty()) {
+            result.add(start)
+        }
 
         remainder = end.drop(1)
     }
 
     return result
+}
+
+/**
+ * Splits this iterable into parts according to a predicate. Retains the entry matching the predicate.
+ */
+fun <T> Iterable<T>.splitInclusive(predicate: (T) -> Boolean): List<List<T>> {
+    val result = mutableListOf<List<T>>()
+    var remainder = this
+
+    while (true) {
+        val endIndex = remainder.drop(1).indexOfFirst(predicate);
+
+        if (endIndex == -1) {
+            result.add(remainder.toList())
+            break
+        }
+
+        val start = remainder.take(endIndex + 1);
+        result.add(start)
+
+        remainder = remainder.drop(endIndex + 1)
+    }
+
+    return result
+}
+
+fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean): List<T> {
+    var shouldContinue = true
+    
+    return takeWhile {
+        val result = shouldContinue
+        shouldContinue = predicate(it)
+        result
+    }
 }
