@@ -24,3 +24,5 @@ puzzle is unlocked when you complete the first. Each puzzle grants _one star_. G
 | [Day 6: Tuning Trouble](./src/dev/adtennant/adventofcode/day06)          | 🌟🌟  |
 | [Day 7: No Space Left On Device](./src/dev/adtennant/adventofcode/day07) | 🌟🌟  |
 | [Day 8: Treetop Tree House](./src/dev/adtennant/adventofcode/day08)      | 🌟🌟  |
+| [Day 9: Rope Bridge](./src/dev/adtennant/adventofcode/day09)             | 🌟🌟  |
+| [Day 10: Cathode-Ray Tube](./src/dev/adtennant/adventofcode/day10)       | 🌟🌟  |

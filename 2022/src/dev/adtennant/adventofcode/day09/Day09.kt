@@ -1,7 +1,7 @@
 package dev.adtennant.adventofcode.day09
 
 import readInput
-import kotlin.math.absoluteValue
+import kotlin.math.abs
 
 enum class Direction {
     UP, DOWN, LEFT, RIGHT
@@ -21,7 +21,7 @@ fun String.toMove() = split(" ")
     .let { Move(it[0].toDirection(), it[1].toInt()) }
 
 data class Point(val x: Int, val y: Int) {
-    fun isTouching(other: Point) = (x - other.x).absoluteValue < 2 && (y - other.y).absoluteValue < 2
+    fun isTouching(other: Point) = abs(x - other.x) < 2 && abs(y - other.y) < 2
 
     fun moveTowards(other: Point) = Point(
         when {
