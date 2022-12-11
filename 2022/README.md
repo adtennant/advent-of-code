@@ -26,3 +26,4 @@ puzzle is unlocked when you complete the first. Each puzzle grants _one star_. G
 | [Day 8: Treetop Tree House](./src/dev/adtennant/adventofcode/day08)      | 🌟🌟  |
 | [Day 9: Rope Bridge](./src/dev/adtennant/adventofcode/day09)             | 🌟🌟  |
 | [Day 10: Cathode-Ray Tube](./src/dev/adtennant/adventofcode/day10)       | 🌟🌟  |
+| [Day 11: Monkey in the Middle](./src/dev/adtennant/adventofcode/day11)   | 🌟🌟  |
