@@ -83,10 +83,12 @@ fun <T> Iterable<T>.splitInclusive(predicate: (T) -> Boolean): List<List<T>> {
 
 fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean): List<T> {
     var shouldContinue = true
-    
+
     return takeWhile {
         val result = shouldContinue
         shouldContinue = predicate(it)
         result
     }
 }
+
+fun <E> Iterable<E>.indexesOf(e: E) = mapIndexedNotNull { index, elem -> index.takeIf { elem == e } }
