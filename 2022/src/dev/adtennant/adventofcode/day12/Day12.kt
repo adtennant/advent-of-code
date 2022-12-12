@@ -1,43 +1,36 @@
 package dev.adtennant.adventofcode.day12
 
-import indexesOf
 import readInput
-import java.lang.Thread.yield
 import java.util.LinkedList
 
-typealias Point = Pair<Int, Int>
-
-val Point.x get() = first
-val Point.y get() = second
-
-operator fun Point.plus(other: Point) = Point(x + other.x, y + other.y)
-
-class Grid(input: List<String>) {
-    private val data = input.flatMap { it.toCharArray().toList() }
-    private val width = input.first().length
-    private val height = input.size
-
-    fun find(c: Char) = data.indexOf(c)
-        .let { Point(it % width, it / width) }
-
-    fun findAll(c: Char) = data.indexesOf(c)
-        .map { Point(it % width, it / width) }
-
-    private fun getHeight(point: Point) = data[point.y * width + point.x].let {
-        when (it) {
+data class Cell(val x: Int, val y: Int, val c: Char) {
+    val height
+        get() = when (c) {
             'S' -> 'a'
             'E' -> 'z'
-            else -> it
-        }
-    }
+            else -> c
+        }.code
+}
 
-    private fun inBounds(point: Point) = point.x in 0 until width && point.y in 0 until height
+class Map(input: List<String>) {
+    private val grid = input.flatMapIndexed { y, row -> row.mapIndexed { x, c -> Cell(x, y, c) } }
 
-    fun findPath(from: Point = find('S'), to: Point = find('E')): List<Point> {
-        val q = LinkedList<Point>()
+    fun find(c: Char) = grid.find { it.c == c }
+    fun findAll(c: Char) = grid.filter { it.c == c }
+    private fun getOrNull(x: Int, y: Int) = grid.firstOrNull { it.x == x && it.y == y }
+
+    private fun neighbours(cell: Cell): List<Cell> = listOfNotNull(
+        getOrNull(cell.x, cell.y - 1),
+        getOrNull(cell.x, cell.y + 1),
+        getOrNull(cell.x - 1, cell.y),
+        getOrNull(cell.x + 1, cell.y)
+    ).filter { neighbour -> (neighbour.height - cell.height) <= 1 }
+
+    fun findPath(from: Cell = find('S')!!, to: Cell = find('E')!!): List<Cell> {
+        val q = LinkedList<Cell>()
         q.add(from)
 
-        val explored = mutableMapOf<Point, Point?>(from to null)
+        val explored = mutableMapOf<Cell, Cell?>(from to null)
 
         while (!q.isEmpty()) {
             val v = q.remove()
@@ -63,29 +56,13 @@ class Grid(input: List<String>) {
 
         return emptyList()
     }
-
-    private fun neighbours(point: Point): List<Point> = getHeight(point)
-        .let { current ->
-            listOf(
-                Point(0, -1),
-                Point(0, 1),
-                Point(-1, 0),
-                Point(1, 0)
-            )
-                .map { point + it }
-                .filter { inBounds(it) }
-                .filter {
-                    val neighbour = getHeight(it)
-                    (neighbour.code - current.code) <= 1
-                }
-        }
 }
 
 fun main() {
-    fun part1(input: List<String>) = Grid(input).findPath().size
+    fun part1(input: List<String>) = Map(input).findPath().size
 
-    fun part2(input: List<String>) = Grid(input).let { grid ->
-        val starts = grid.findAll('a') + grid.find('S')
+    fun part2(input: List<String>) = Map(input).let { grid ->
+        val starts = grid.findAll('a') + grid.find('S')!!
         starts.map { start -> grid.findPath(start) }
             .filter { it.isNotEmpty() }
             .minOf { it.size }
