@@ -19,14 +19,14 @@ data class Monkey(
             } else {
                 failure
             }
-            Pair(target, worry)
+            IndexedValue(target, worry)
         }
 
-        return monkeys.mapIndexed { i, monkey ->
+        return monkeys.withIndex().map { (index, monkey) ->
             if (monkey == this) {
                 monkey.copy(items = emptyList(), business = business + items.size)
             } else {
-                val received = targets.filter { it.first == i }.map { it.second }
+                val received = targets.filter { it.index == index }.map { it.value }
                 monkey.copy(items = monkey.items + received)
             }
         }
