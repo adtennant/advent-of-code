@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day05
+package day05
 
 import readInput
 import split

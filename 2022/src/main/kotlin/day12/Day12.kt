@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day12
+package day12
 
 import readInput
 import java.util.LinkedList

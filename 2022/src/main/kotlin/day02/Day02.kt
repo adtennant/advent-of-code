@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day02
+package day02
 
 import readInput
 import takeExact

@@ -5,13 +5,13 @@ import java.security.MessageDigest
 /**
  * Reads lines from the given input txt file.
  */
-fun readInput(name: String) = File("src/dev/adtennant/adventofcode", "$name.txt")
+fun readInput(name: String) = File("src/main/kotlin", "$name.txt")
     .readLines()
 
 /**
  * Reads lines from the given input txt file as text.
  */
-fun readInputAsText(name: String) = File("src/dev/adtennant/adventofcode", "$name.txt")
+fun readInputAsText(name: String) = File("src/main/kotlin", "$name.txt")
     .readText()
 
 

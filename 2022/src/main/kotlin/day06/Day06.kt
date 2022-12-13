@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day06
+package day06
 
 import readInputAsText
 

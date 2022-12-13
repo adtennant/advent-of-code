@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day13
+package day13
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json

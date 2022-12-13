@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day10
+package day10
 
 import readInput
 import kotlin.math.abs

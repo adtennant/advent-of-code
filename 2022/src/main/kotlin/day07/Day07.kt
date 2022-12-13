@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day07
+package day07
 
 import readInput
 

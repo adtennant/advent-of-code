@@ -1,4 +1,4 @@
-package dev.adtennant.adventofcode.day08
+package day08
 
 import readInput
 import takeWhileInclusive
@@ -33,9 +33,9 @@ fun Grid.onEdge(tree: Tree): Boolean {
     val maxColumn = this.maxOf { it.column }
 
     return tree.row == 0 ||
-        tree.row == maxRow ||
-        tree.column == 0 ||
-        tree.column == maxColumn
+            tree.row == maxRow ||
+            tree.column == 0 ||
+            tree.column == maxColumn
 }
 
 fun Grid.visibleFromLeft(tree: Tree) = this.toLeft(tree)
@@ -51,10 +51,10 @@ fun Grid.visibleFromBottom(tree: Tree) = this.toBottom(tree)
     .all { it.height < tree.height }
 
 fun Grid.isVisible(tree: Tree) = onEdge(tree) ||
-    visibleFromLeft(tree) ||
-    visibleFromRight(tree) ||
-    visibleFromTop(tree) ||
-    visibleFromBottom(tree)
+        visibleFromLeft(tree) ||
+        visibleFromRight(tree) ||
+        visibleFromTop(tree) ||
+        visibleFromBottom(tree)
 
 fun Grid.countVisible() = count { tree ->
     isVisible(tree)
