@@ -29,3 +29,5 @@ puzzle is unlocked when you complete the first. Each puzzle grants _one star_. G
 | [Day 11: Monkey in the Middle](./src/dev/adtennant/adventofcode/day11)    | 🌟🌟  |
 | [Day 12: Hill Climbing Algorithm](./src/dev/adtennant/adventofcode/day12) | 🌟🌟  |
 | [Day 13: Distress Signal](./src/dev/adtennant/adventofcode/day13)         | 🌟🌟  |
+| [Day 14: Regolith Reservoir](./src/dev/adtennant/adventofcode/day14)      | 🌟🌟  |
+| [Day 15: Beacon Exclusion Zone](./src/dev/adtennant/adventofcode/day15)   | 🌟🌟  |
