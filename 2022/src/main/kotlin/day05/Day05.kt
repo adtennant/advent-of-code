@@ -67,7 +67,7 @@ fun String.toMove() =
         .let { Move(it[1].toInt(), it[2].toInt(), it[3].toInt()) }
 
 fun main() {
-    fun getStacksAndMoves(input: List<String>) = input.split(String::isNotEmpty)
+    fun getStacksAndMoves(input: List<String>) = input.split(String::isEmpty)
         .takeExact(2)
         .let {
             Pair(

@@ -5,7 +5,7 @@ import split
 
 fun main() {
     fun getTotals(input: List<String>) = input
-        .split(String::isNotEmpty)
+        .split(String::isEmpty)
         .map {
             it.map(String::toInt)
                 .sum()

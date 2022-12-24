@@ -1,5 +1,9 @@
 package day11
 
+import checkedAdd
+import checkedMul
+import checkedSub
+import floorDiv
 import readInput
 import split
 
@@ -41,7 +45,7 @@ fun List<Monkey>.doRounds(rounds: Int, worryTransform: (Long) -> Long) = (0 unti
 
 fun List<Monkey>.business() = sortedByDescending { it.business }
     .take(2)
-    .let { it[0].business * it[1].business }
+    .let { it[0].business checkedMul it[1].business }
 
 fun String.toOperation(): (Long) -> Long {
     val parts = split(" ")
@@ -49,14 +53,14 @@ fun String.toOperation(): (Long) -> Long {
 
     return when (val value = parts[4]) {
         "old" -> when (operator) {
-            "*" -> { old -> old * old }
+            "*" -> { old -> old checkedMul old }
             else -> error("invalid operation")
         }
         else -> when (operator) {
-            "+" -> { old -> old + value.toLong() }
-            "-" -> { old -> old - value.toLong() }
-            "*" -> { old -> old * value.toLong() }
-            "/" -> { old -> old / value.toLong() }
+            "+" -> { old -> old checkedAdd value.toLong() }
+            "-" -> { old -> old checkedSub value.toLong() }
+            "*" -> { old -> old checkedMul value.toLong() }
+            "/" -> { old -> old floorDiv value.toLong() }
             else -> error("invalid operation")
         }
     }
@@ -73,7 +77,7 @@ fun List<String>.toMonkey(): Monkey {
 }
 
 fun main() {
-    fun parseMonkeys(input: List<String>) = input.split(String::isNotEmpty)
+    fun parseMonkeys(input: List<String>) = input.split(String::isEmpty)
         .map(List<String>::toMonkey)
 
     fun part1(input: List<String>) = parseMonkeys(input)
@@ -82,7 +86,7 @@ fun main() {
 
     fun part2(input: List<String>): Long {
         val monkeys = parseMonkeys(input)
-        val divisor = monkeys.fold(1L) { acc, monkey -> acc * monkey.test }
+        val divisor = monkeys.fold(1L) { acc, monkey -> acc checkedMul monkey.test }
 
         return monkeys.doRounds(10000) { worry -> worry % divisor }
             .business()

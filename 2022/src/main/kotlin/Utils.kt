@@ -45,37 +45,13 @@ fun <T> Iterable<T>.split(predicate: (T) -> Boolean): List<List<T>> {
     var remainder = this
 
     while (remainder.toList().isNotEmpty()) {
-        val (start, end) = remainder.span(predicate)
+        val (start, end) = remainder.span { i -> !predicate(i) }
 
         if (start.isNotEmpty()) {
             result.add(start)
         }
 
         remainder = end.drop(1)
-    }
-
-    return result
-}
-
-/**
- * Splits this iterable into parts according to a predicate. Retains the entry matching the predicate.
- */
-fun <T> Iterable<T>.splitInclusive(predicate: (T) -> Boolean): List<List<T>> {
-    val result = mutableListOf<List<T>>()
-    var remainder = this
-
-    while (true) {
-        val endIndex = remainder.drop(1).indexOfFirst(predicate);
-
-        if (endIndex == -1) {
-            result.add(remainder.toList())
-            break
-        }
-
-        val start = remainder.take(endIndex + 1);
-        result.add(start)
-
-        remainder = remainder.drop(endIndex + 1)
     }
 
     return result
@@ -91,4 +67,34 @@ fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean): List<T> {
     }
 }
 
-fun <E> Iterable<E>.indexesOf(e: E) = mapIndexedNotNull { index, elem -> index.takeIf { elem == e } }
+infix fun Int.checkedAdd(other: Int): Int {
+    return StrictMath.addExact(this, other)
+}
+
+infix fun Int.checkedSub(other: Int): Int {
+    return StrictMath.subtractExact(this, other)
+}
+
+infix fun Int.checkedMul(other: Int): Int {
+    return StrictMath.multiplyExact(this, other)
+}
+
+infix fun Int.floorDiv(other: Int): Int {
+    return StrictMath.floorDiv(this, other)
+}
+
+infix fun Long.checkedAdd(other: Long): Long {
+    return StrictMath.addExact(this, other)
+}
+
+infix fun Long.checkedSub(other: Long): Long {
+    return StrictMath.subtractExact(this, other)
+}
+
+infix fun Long.checkedMul(other: Long): Long {
+    return StrictMath.multiplyExact(this, other)
+}
+
+infix fun Long.floorDiv(other: Long): Long {
+    return StrictMath.floorDiv(this, other)
+}
