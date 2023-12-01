@@ -15,7 +15,7 @@ func Part2(input string) int {
 	return 0
 }
 
-// go:embed input.txt
+//go:embed input.txt
 var input string
 
 func main() {
