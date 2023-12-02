@@ -41,10 +41,6 @@ func Solve(input string, exp1, exp2 string) int {
 	sum := 0
 
 	for _, line := range util.Lines(input) {
-		if len(line) == 0 {
-			continue
-		}
-
 		first, _ := Parse(re1.FindStringSubmatch(line)[1])
 		last, _ := Parse(re2.FindStringSubmatch(line)[1])
 
