@@ -10,25 +10,25 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-type Cubes struct {
+type result struct {
 	r int
 	g int
 	b int
 }
 
-type Game struct {
-	id    int
-	cubes []Cubes
+type game struct {
+	id      int
+	results []result
 }
 
 var idRegexp = regexp.MustCompile(`\d+`)
 
-func ParseID(str string) int {
+func parseID(str string) int {
 	v, _ := strconv.Atoi(idRegexp.FindString(str))
 	return v
 }
 
-func ParseColor(str, color string) int {
+func parseColor(str, color string) int {
 	re := regexp.MustCompile(fmt.Sprintf(`(\d*) %s`, color))
 	matches := re.FindStringSubmatch(str)
 
@@ -40,41 +40,41 @@ func ParseColor(str, color string) int {
 	return v
 }
 
-func ParseCubes(str string) Cubes {
-	return Cubes{
-		r: ParseColor(str, "red"),
-		g: ParseColor(str, "green"),
-		b: ParseColor(str, "blue"),
+func parseCubes(str string) result {
+	return result{
+		r: parseColor(str, "red"),
+		g: parseColor(str, "green"),
+		b: parseColor(str, "blue"),
 	}
 }
 
-func ParseResults(str string) (cubes []Cubes) {
+func parseResults(str string) (cubes []result) {
 	for _, part := range strings.Split(str, ";") {
-		cubes = append(cubes, ParseCubes(part))
+		cubes = append(cubes, parseCubes(part))
 	}
 
 	return cubes
 }
 
-func ParseGame(line string) Game {
+func parseGame(line string) game {
 	parts := strings.Split(line, ":")
 
-	return Game{
-		id:    ParseID(parts[0]),
-		cubes: ParseResults(parts[1]),
+	return game{
+		id:      parseID(parts[0]),
+		results: parseResults(parts[1]),
 	}
 }
 
-func ParseGames(input string) (games []Game) {
+func parseGames(input string) (games []game) {
 	for _, line := range util.Lines(input) {
-		games = append(games, ParseGame(line))
+		games = append(games, parseGame(line))
 	}
 
 	return games
 }
 
 func Part1(input string) int {
-	games := ParseGames(input)
+	games := parseGames(input)
 
 	maxR := 12
 	maxG := 13
@@ -85,7 +85,7 @@ func Part1(input string) int {
 	for _, game := range games {
 		possible := true
 
-		for _, result := range game.cubes {
+		for _, result := range game.results {
 			possible = result.r <= maxR && result.g <= maxG && result.b <= maxB
 
 			if !possible {
@@ -102,7 +102,7 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	games := ParseGames(input)
+	games := parseGames(input)
 
 	totalPower := 0
 
@@ -111,7 +111,7 @@ func Part2(input string) int {
 		minG := 0
 		minB := 0
 
-		for _, result := range game.cubes {
+		for _, result := range game.results {
 			minR = max(minR, result.r)
 			minG = max(minG, result.g)
 			minB = max(minB, result.b)

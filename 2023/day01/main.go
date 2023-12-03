@@ -9,7 +9,7 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-func Parse(value string) (int, error) {
+func parse(value string) (int, error) {
 	switch value {
 	case "one":
 		return 1, nil
@@ -34,15 +34,15 @@ func Parse(value string) (int, error) {
 	}
 }
 
-func Solve(input string, exp1, exp2 string) int {
+func solve(input string, exp1, exp2 string) int {
 	re1 := regexp.MustCompile(exp1)
 	re2 := regexp.MustCompile(exp2)
 
 	sum := 0
 
 	for _, line := range util.Lines(input) {
-		first, _ := Parse(re1.FindStringSubmatch(line)[1])
-		last, _ := Parse(re2.FindStringSubmatch(line)[1])
+		first, _ := parse(re1.FindStringSubmatch(line)[1])
+		last, _ := parse(re2.FindStringSubmatch(line)[1])
 
 		value := first*10 + last
 		sum += value
@@ -52,11 +52,11 @@ func Solve(input string, exp1, exp2 string) int {
 }
 
 func Part1(input string) int {
-	return Solve(input, `^\D*(\d).*$`, `^.*(\d)\D*$`)
+	return solve(input, `^\D*(\d).*$`, `^.*(\d)\D*$`)
 }
 
 func Part2(input string) int {
-	return Solve(input, `.*?(one|two|three|four|five|six|seven|eight|nine|\d).*`, `.*(one|two|three|four|five|six|seven|eight|nine|\d)`)
+	return solve(input, `.*?(one|two|three|four|five|six|seven|eight|nine|\d).*`, `.*(one|two|three|four|five|six|seven|eight|nine|\d)`)
 }
 
 //go:embed input.txt
