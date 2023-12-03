@@ -41,20 +41,26 @@ func parseSchematic(input string) (parts []partNumber, symbols map[point]bool, g
 	gears = make(map[point]bool)
 
 	for y, line := range util.Lines(input) {
-		for x := 0; x < len(line); x++ {
+		x := 0
+
+		for x < len(line) {
 			if line[x] >= '0' && line[x] <= '9' {
 				num, len := extractPartNumber(line[x:])
 
 				part := partNumber{value: num, startX: x, endX: x + len - 1, y: y}
 				parts = append(parts, part)
 
-				x += len - 1
-			} else if line[x] != '.' {
-				symbols[point{x, y}] = true
-
-				if line[x] == '*' {
-					gears[point{x, y}] = true
+				x += len
+			} else {
+				if line[x] != '.' {
+					if line[x] == '*' {
+						gears[point{x, y}] = true
+					} else {
+						symbols[point{x, y}] = true
+					}
 				}
+
+				x++
 			}
 		}
 	}
@@ -63,20 +69,20 @@ func parseSchematic(input string) (parts []partNumber, symbols map[point]bool, g
 }
 
 func Part1(input string) int {
-	parts, symbols, _ := parseSchematic(input)
+	parts, symbols, gears := parseSchematic(input)
 
 	sum := 0
 
 	for _, part := range parts {
+	loop:
 		for y := part.y - 1; y <= part.y+1; y++ {
 			for x := part.startX - 1; x <= part.endX+1; x++ {
-				if symbols[point{x, y}] {
+				if symbols[point{x, y}] || gears[point{x, y}] {
 					sum += part.value
-					goto done
+					break loop
 				}
 			}
 		}
-	done:
 	}
 
 	return sum
@@ -88,15 +94,15 @@ func Part2(input string) int {
 	partsByGear := make(map[point][]partNumber)
 
 	for _, part := range parts {
+	loop:
 		for y := part.y - 1; y <= part.y+1; y++ {
 			for x := part.startX - 1; x <= part.endX+1; x++ {
 				if gears[point{x, y}] {
 					partsByGear[point{x, y}] = append(partsByGear[point{x, y}], part)
-					goto done
+					break loop
 				}
 			}
 		}
-	done:
 	}
 
 	sum := 0
