@@ -20,7 +20,13 @@ type partNumber struct {
 	y            int
 }
 
-func extractPartNumber(str string) (int, int) {
+type schematic struct {
+	parts   []partNumber
+	symbols map[point]bool
+	gears   map[point]bool
+}
+
+func extractPartNumber(str string) (int, int, error) {
 	num := ""
 	i := 0
 
@@ -32,31 +38,38 @@ func extractPartNumber(str string) (int, int) {
 		}
 	}
 
-	n, _ := strconv.Atoi(num)
-	return n, i
+	n, err := strconv.Atoi(num)
+	if err != nil {
+		return -1, -1, err
+	}
+
+	return n, i, nil
 }
 
-func parseSchematic(input string) (parts []partNumber, symbols map[point]bool, gears map[point]bool) {
-	symbols = make(map[point]bool)
-	gears = make(map[point]bool)
+func parseSchematic(input string) (s schematic, err error) {
+	s.symbols = make(map[point]bool)
+	s.gears = make(map[point]bool)
 
 	for y, line := range util.Lines(input) {
 		x := 0
 
 		for x < len(line) {
 			if line[x] >= '0' && line[x] <= '9' {
-				num, len := extractPartNumber(line[x:])
+				num, len, err := extractPartNumber(line[x:])
+				if err != nil {
+					return s, fmt.Errorf("failed to extract part number: %w", err)
+				}
 
 				part := partNumber{value: num, startX: x, endX: x + len - 1, y: y}
-				parts = append(parts, part)
+				s.parts = append(s.parts, part)
 
 				x += len
 			} else {
 				if line[x] != '.' {
 					if line[x] == '*' {
-						gears[point{x, y}] = true
+						s.gears[point{x, y}] = true
 					} else {
-						symbols[point{x, y}] = true
+						s.symbols[point{x, y}] = true
 					}
 				}
 
@@ -65,19 +78,22 @@ func parseSchematic(input string) (parts []partNumber, symbols map[point]bool, g
 		}
 	}
 
-	return parts, symbols, gears
+	return s, nil
 }
 
-func Part1(input string) int {
-	parts, symbols, gears := parseSchematic(input)
+func Part1(input string) (int, error) {
+	schematic, err := parseSchematic(input)
+	if err != nil {
+		return -1, err
+	}
 
 	sum := 0
 
-	for _, part := range parts {
+	for _, part := range schematic.parts {
 	loop:
 		for y := part.y - 1; y <= part.y+1; y++ {
 			for x := part.startX - 1; x <= part.endX+1; x++ {
-				if symbols[point{x, y}] || gears[point{x, y}] {
+				if schematic.symbols[point{x, y}] || schematic.gears[point{x, y}] {
 					sum += part.value
 					break loop
 				}
@@ -85,19 +101,22 @@ func Part1(input string) int {
 		}
 	}
 
-	return sum
+	return sum, nil
 }
 
-func Part2(input string) int {
-	parts, _, gears := parseSchematic(input)
+func Part2(input string) (int, error) {
+	schematic, err := parseSchematic(input)
+	if err != nil {
+		return -1, err
+	}
 
 	partsByGear := make(map[point][]partNumber)
 
-	for _, part := range parts {
+	for _, part := range schematic.parts {
 	loop:
 		for y := part.y - 1; y <= part.y+1; y++ {
 			for x := part.startX - 1; x <= part.endX+1; x++ {
-				if gears[point{x, y}] {
+				if schematic.gears[point{x, y}] {
 					partsByGear[point{x, y}] = append(partsByGear[point{x, y}], part)
 					break loop
 				}
@@ -113,15 +132,12 @@ func Part2(input string) int {
 		}
 	}
 
-	return sum
+	return sum, nil
 }
 
 //go:embed input.txt
 var input string
 
 func main() {
-	input := util.Sanitize(input)
-
-	fmt.Println("Part 1 =", Part1(input))
-	fmt.Println("Part 2 =", Part2(input))
+	util.Main(input, Part1, Part2)
 }

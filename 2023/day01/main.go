@@ -9,7 +9,7 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-func parse(value string) (int, error) {
+func parseNumber(value string) (int, error) {
 	switch value {
 	case "one":
 		return 1, nil
@@ -34,28 +34,56 @@ func parse(value string) (int, error) {
 	}
 }
 
-func solve(input string, exp1, exp2 string) int {
-	re1 := regexp.MustCompile(exp1)
-	re2 := regexp.MustCompile(exp2)
+func parseNumberFromLine(re *regexp.Regexp, line string) (int, error) {
+	matches := re.FindStringSubmatch(line)
+	if len(matches) < 2 {
+		return -1, fmt.Errorf("failed to find number: %s", line)
+	}
+
+	num, err := parseNumber(re.FindStringSubmatch(line)[1])
+	if err != nil {
+		return -1, fmt.Errorf("failed to parse number: %s: %w", line, err)
+	}
+
+	return num, nil
+}
+
+func solve(input string, exp1, exp2 string) (int, error) {
+	re1, err := regexp.Compile(exp1)
+	if err != nil {
+		return -1, fmt.Errorf("failed to compile exp1: %w", err)
+	}
+
+	re2, err := regexp.Compile(exp2)
+	if err != nil {
+		return -1, fmt.Errorf("failed to compile exp2: %w", err)
+	}
 
 	sum := 0
 
 	for _, line := range util.Lines(input) {
-		first, _ := parse(re1.FindStringSubmatch(line)[1])
-		last, _ := parse(re2.FindStringSubmatch(line)[1])
+		first, err := parseNumberFromLine(re1, line)
+		if err != nil {
+			return -1, fmt.Errorf("failed to parse first number from line: %s: %w", line, err)
+		}
+
+		last, err := parseNumberFromLine(re2, line)
+		if err != nil {
+			return -1, fmt.Errorf("failed to parse last number from line: %s: %w", line, err)
+		}
 
 		value := first*10 + last
 		sum += value
 	}
 
-	return sum
+	return sum, nil
 }
 
-func Part1(input string) int {
+func Part1(input string) (int, error) {
 	return solve(input, `^\D*(\d).*$`, `^.*(\d)\D*$`)
 }
 
-func Part2(input string) int {
+func Part2(input string) (int, error) {
 	return solve(input, `.*?(one|two|three|four|five|six|seven|eight|nine|\d).*`, `.*(one|two|three|four|five|six|seven|eight|nine|\d)`)
 }
 
@@ -63,8 +91,5 @@ func Part2(input string) int {
 var input string
 
 func main() {
-	input := util.Sanitize(input)
-
-	fmt.Println("Part 1 =", Part1(input))
-	fmt.Println("Part 2 =", Part2(input))
+	util.Main(input, Part1, Part2)
 }

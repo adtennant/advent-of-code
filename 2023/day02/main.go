@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"adtennant.dev/aoc/util"
 )
@@ -21,60 +22,131 @@ type game struct {
 	results []result
 }
 
-var idRegexp = regexp.MustCompile(`\d+`)
+func parseID(str string) (int, error) {
+	v, err := strconv.Atoi(strings.TrimLeftFunc(str, func(r rune) bool {
+		return !unicode.IsNumber(r)
+	}))
+	if err != nil {
+		return -1, err
+	}
 
-func parseID(str string) int {
-	v, _ := strconv.Atoi(idRegexp.FindString(str))
-	return v
+	return v, nil
 }
 
-func parseColor(str, color string) int {
-	re := regexp.MustCompile(fmt.Sprintf(`(\d*) %s`, color))
+var expR = regexp.MustCompile(`(\d*) red`)
+var expG = regexp.MustCompile(`(\d*) green`)
+var expB = regexp.MustCompile(`(\d*) blue`)
+
+type Color int
+
+const (
+	R Color = iota
+	G
+	B
+)
+
+func parseColor(str string, color Color) (int, error) {
+	var re *regexp.Regexp
+
+	switch color {
+	case R:
+		re = expR
+	case G:
+		re = expG
+	case B:
+		re = expB
+	}
+
 	matches := re.FindStringSubmatch(str)
 
 	if matches == nil {
-		return 0
+		return 0, nil
 	}
 
-	v, _ := strconv.Atoi(matches[1])
-	return v
+	v, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return -1, err
+	}
+
+	return v, nil
 }
 
-func parseCubes(str string) result {
+func parseResult(str string) (result, error) {
+	r, err := parseColor(str, R)
+	if err != nil {
+		return result{}, fmt.Errorf("failed to parse red: %w", err)
+	}
+
+	g, err := parseColor(str, G)
+	if err != nil {
+		return result{}, fmt.Errorf("failed to parse green: %w", err)
+	}
+
+	b, err := parseColor(str, B)
+	if err != nil {
+		return result{}, fmt.Errorf("failed to parse blue: %w", err)
+	}
+
 	return result{
-		r: parseColor(str, "red"),
-		g: parseColor(str, "green"),
-		b: parseColor(str, "blue"),
-	}
+		r,
+		g,
+		b,
+	}, nil
 }
 
-func parseResults(str string) (cubes []result) {
+func parseResults(str string) (results []result, err error) {
 	for _, part := range strings.Split(str, ";") {
-		cubes = append(cubes, parseCubes(part))
+		result, err := parseResult(part)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse result: %w", err)
+		}
+
+		results = append(results, result)
 	}
 
-	return cubes
+	return results, nil
 }
 
-func parseGame(line string) game {
+func parseGame(line string) (game, error) {
 	parts := strings.Split(line, ":")
+	if len(parts) != 2 {
+		return game{}, fmt.Errorf("invalid format")
+	}
+
+	id, err := parseID(parts[0])
+	if err != nil {
+		return game{}, fmt.Errorf("failed to parse ID: %w", err)
+	}
+
+	results, err := parseResults(parts[1])
+	if err != nil {
+		return game{}, fmt.Errorf("failed to parse result: %w", err)
+	}
 
 	return game{
-		id:      parseID(parts[0]),
-		results: parseResults(parts[1]),
-	}
+		id,
+		results,
+	}, nil
 }
 
-func parseGames(input string) (games []game) {
+func parseGames(input string) (games []game, err error) {
 	for _, line := range util.Lines(input) {
-		games = append(games, parseGame(line))
+		game, err := parseGame(line)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse game from line: %s: %w", line, err)
+		}
+
+		games = append(games, game)
 	}
 
-	return games
+	return games, nil
 }
 
-func Part1(input string) int {
-	games := parseGames(input)
+func Part1(input string) (int, error) {
+	games, err := parseGames(input)
+	if err != nil {
+		return -1, err
+	}
 
 	maxR := 12
 	maxG := 13
@@ -98,11 +170,14 @@ func Part1(input string) int {
 		}
 	}
 
-	return sum
+	return sum, nil
 }
 
-func Part2(input string) int {
-	games := parseGames(input)
+func Part2(input string) (int, error) {
+	games, err := parseGames(input)
+	if err != nil {
+		return -1, err
+	}
 
 	totalPower := 0
 
@@ -120,15 +195,12 @@ func Part2(input string) int {
 		totalPower += minR * minG * minB
 	}
 
-	return totalPower
+	return totalPower, nil
 }
 
 //go:embed input.txt
 var input string
 
 func main() {
-	input := util.Sanitize(input)
-
-	fmt.Println("Part 1 =", Part1(input))
-	fmt.Println("Part 2 =", Part2(input))
+	util.Main(input, Part1, Part2)
 }
