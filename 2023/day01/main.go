@@ -3,73 +3,84 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"regexp"
-	"strconv"
+	"strings"
 
 	"adtennant.dev/aoc/util"
 )
 
-func parseNumber(value string) (int, error) {
-	switch value {
-	case "one":
-		return 1, nil
-	case "two":
-		return 2, nil
-	case "three":
-		return 3, nil
-	case "four":
-		return 4, nil
-	case "five":
-		return 5, nil
-	case "six":
-		return 6, nil
-	case "seven":
-		return 7, nil
-	case "eight":
-		return 8, nil
-	case "nine":
-		return 9, nil
+type ExtractFunc func(string) (int, bool)
+
+func extractNumber(str string) (int, bool) {
+	if str[0] >= '0' && str[0] <= '9' {
+		return int(str[0] - '0'), true
+	}
+
+	return -1, false
+}
+
+func extractNumberOrWord(str string) (int, bool) {
+	if num, found := extractNumber(str); found {
+		return num, true
+	}
+
+	switch {
+	case strings.HasPrefix(str, "zero"):
+		return 0, true
+	case strings.HasPrefix(str, "one"):
+		return 1, true
+	case strings.HasPrefix(str, "two"):
+		return 2, true
+	case strings.HasPrefix(str, "three"):
+		return 3, true
+	case strings.HasPrefix(str, "four"):
+		return 4, true
+	case strings.HasPrefix(str, "five"):
+		return 5, true
+	case strings.HasPrefix(str, "six"):
+		return 6, true
+	case strings.HasPrefix(str, "seven"):
+		return 7, true
+	case strings.HasPrefix(str, "eight"):
+		return 8, true
+	case strings.HasPrefix(str, "nine"):
+		return 9, true
 	default:
-		return strconv.Atoi(value)
+		return -1, false
 	}
 }
 
-func parseNumberFromLine(re *regexp.Regexp, line string) (int, error) {
-	matches := re.FindStringSubmatch(line)
-	if len(matches) < 2 {
-		return -1, fmt.Errorf("failed to find number: %s", line)
+func extractFirst(str string, extract ExtractFunc) (int, bool) {
+	for i := 0; i < len(str); i++ {
+		if num, found := extract(str[i:]); found {
+			return num, true
+		}
 	}
 
-	num, err := parseNumber(re.FindStringSubmatch(line)[1])
-	if err != nil {
-		return -1, fmt.Errorf("failed to parse number: %s: %w", line, err)
-	}
-
-	return num, nil
+	return -1, false
 }
 
-func solve(input string, exp1, exp2 string) (int, error) {
-	re1, err := regexp.Compile(exp1)
-	if err != nil {
-		return -1, fmt.Errorf("failed to compile exp1: %w", err)
+func extractLast(str string, extract ExtractFunc) (int, bool) {
+	for i := len(str) - 1; i >= 0; i-- {
+		if num, found := extract(str[i:]); found {
+			return num, true
+		}
 	}
 
-	re2, err := regexp.Compile(exp2)
-	if err != nil {
-		return -1, fmt.Errorf("failed to compile exp2: %w", err)
-	}
+	return -1, false
+}
 
+func solve(input string, extract ExtractFunc) (int, error) {
 	sum := 0
 
 	for _, line := range util.Lines(input) {
-		first, err := parseNumberFromLine(re1, line)
-		if err != nil {
-			return -1, fmt.Errorf("failed to parse first number from line: %s: %w", line, err)
+		first, found := extractFirst(line, extract)
+		if !found {
+			return -1, fmt.Errorf("failed to find first number in line: %s", line)
 		}
 
-		last, err := parseNumberFromLine(re2, line)
-		if err != nil {
-			return -1, fmt.Errorf("failed to parse last number from line: %s: %w", line, err)
+		last, found := extractLast(line, extract)
+		if !found {
+			return -1, fmt.Errorf("failed to find last number in line: %s", line)
 		}
 
 		value := first*10 + last
@@ -80,11 +91,11 @@ func solve(input string, exp1, exp2 string) (int, error) {
 }
 
 func Part1(input string) (int, error) {
-	return solve(input, `^\D*(\d).*$`, `^.*(\d)\D*$`)
+	return solve(input, extractNumber)
 }
 
 func Part2(input string) (int, error) {
-	return solve(input, `.*?(one|two|three|four|five|six|seven|eight|nine|\d).*`, `.*(one|two|three|four|five|six|seven|eight|nine|\d)`)
+	return solve(input, extractNumberOrWord)
 }
 
 //go:embed input.txt

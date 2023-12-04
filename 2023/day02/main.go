@@ -3,7 +3,6 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -33,65 +32,34 @@ func parseID(str string) (int, error) {
 	return v, nil
 }
 
-var expR = regexp.MustCompile(`(\d*) red`)
-var expG = regexp.MustCompile(`(\d*) green`)
-var expB = regexp.MustCompile(`(\d*) blue`)
-
-type Color int
-
-const (
-	R Color = iota
-	G
-	B
-)
-
-func parseColor(str string, color Color) (int, error) {
-	var re *regexp.Regexp
-
-	switch color {
-	case R:
-		re = expR
-	case G:
-		re = expG
-	case B:
-		re = expB
-	}
-
-	matches := re.FindStringSubmatch(str)
-
-	if matches == nil {
-		return 0, nil
-	}
-
-	v, err := strconv.Atoi(matches[1])
-	if err != nil {
-		return -1, err
-	}
-
-	return v, nil
-}
-
 func parseResult(str string) (result, error) {
-	r, err := parseColor(str, R)
-	if err != nil {
-		return result{}, fmt.Errorf("failed to parse red: %w", err)
+	colors := strings.Split(str, ",")
+	res := result{}
+
+	for _, color := range colors {
+		parts := strings.Split(strings.TrimSpace(color), " ")
+		if len(parts) != 2 {
+			return res, fmt.Errorf("invalid format")
+		}
+
+		num, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return res, fmt.Errorf("invalid num: %s", parts[0])
+		}
+
+		switch parts[1] {
+		case "red":
+			res.r = num
+		case "green":
+			res.g = num
+		case "blue":
+			res.b = num
+		default:
+			return res, fmt.Errorf("invalid color: %s", parts[1])
+		}
 	}
 
-	g, err := parseColor(str, G)
-	if err != nil {
-		return result{}, fmt.Errorf("failed to parse green: %w", err)
-	}
-
-	b, err := parseColor(str, B)
-	if err != nil {
-		return result{}, fmt.Errorf("failed to parse blue: %w", err)
-	}
-
-	return result{
-		r,
-		g,
-		b,
-	}, nil
+	return res, nil
 }
 
 func parseResults(str string) (results []result, err error) {
