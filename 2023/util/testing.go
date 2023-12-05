@@ -4,13 +4,13 @@ import (
 	"testing"
 )
 
-type Tests []struct {
+type Tests[T Result] []struct {
 	Name     string
 	Input    string
-	Expected int
+	Expected T
 }
 
-func (tests Tests) Run(t *testing.T, solution Solution) {
+func (tests Tests[T]) Run(t *testing.T, solution Solution[T]) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			input := sanitize(tt.Input)

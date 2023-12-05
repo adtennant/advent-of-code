@@ -8,9 +8,10 @@ You've been doing this long enough to know that to restore snow operations, you 
 
 Collect stars by solving puzzles. Two puzzles will be made available on each day in the Advent calendar; the second puzzle is unlocked when you complete the first. Each puzzle grants _one star_. Good luck!
 
-| Day                                  | Stars |
-| ------------------------------------ | ----- |
-| [Day 1: Trebuchet?!](./src/day01)    | 🌟🌟  |
-| [Day 2: Cube Conundrum](./src/day02) | 🌟🌟  |
-| [Day 3: Gear Ratios](./src/day03)    | 🌟🌟  |
-| [Day 4: Scratchcards](./src/day04)   | 🌟🌟  |
+| Day                                                   | Stars |
+| ----------------------------------------------------- | ----- |
+| [Day 1: Trebuchet?!](./src/day01)                     | 🌟🌟  |
+| [Day 2: Cube Conundrum](./src/day02)                  | 🌟🌟  |
+| [Day 3: Gear Ratios](./src/day03)                     | 🌟🌟  |
+| [Day 4: Scratchcards](./src/day04)                    | 🌟🌟  |
+| [Day 5: If You Give A Seed A Fertilizer](./src/day05) | 🌟🌟  |

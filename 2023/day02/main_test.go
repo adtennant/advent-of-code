@@ -13,7 +13,7 @@ Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green`
 
 func Test_Part1(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input:    exampleInput,
 			Expected: 8,
@@ -22,7 +22,7 @@ func Test_Part1(t *testing.T) {
 }
 
 func Test_Part2(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input:    exampleInput,
 			Expected: 2286,

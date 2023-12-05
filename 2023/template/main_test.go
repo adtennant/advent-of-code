@@ -7,7 +7,7 @@ import (
 )
 
 func Test_Part1(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input:    ``,
 			Expected: 0,
@@ -16,7 +16,7 @@ func Test_Part1(t *testing.T) {
 }
 
 func Test_Part2(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input:    ``,
 			Expected: 0,

@@ -7,7 +7,7 @@ import (
 )
 
 func Test_Part1(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input: `1abc2
 			pqr3stu8vwx
@@ -19,7 +19,7 @@ func Test_Part1(t *testing.T) {
 }
 
 func Test_Part2(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input: `two1nine
 			eightwothree

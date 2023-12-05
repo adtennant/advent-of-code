@@ -5,7 +5,11 @@ import (
 	"strings"
 )
 
-type Solution func(string) (int, error)
+type Result interface {
+	int | int64
+}
+
+type Solution[T Result] func(string) (T, error)
 
 func sanitize(input string) string {
 	var trimmed []string
@@ -17,7 +21,7 @@ func sanitize(input string) string {
 	return strings.Join(trimmed, "\n")
 }
 
-func Main(rawInput string, part1, part2 Solution) {
+func Main[T Result](rawInput string, part1, part2 Solution[T]) {
 	input := sanitize(rawInput)
 
 	result1, err := part1(input)

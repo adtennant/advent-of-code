@@ -18,7 +18,7 @@ const exampleInput = `467..114..
 .664.598..`
 
 func Test_Part1(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input:    exampleInput,
 			Expected: 4361,
@@ -27,7 +27,7 @@ func Test_Part1(t *testing.T) {
 }
 
 func Test_Part2(t *testing.T) {
-	util.Tests{
+	util.Tests[int]{
 		{
 			Input:    exampleInput,
 			Expected: 467835,
