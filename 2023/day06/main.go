@@ -45,11 +45,16 @@ func parseRaces(input string, parseLine ParseLine) (races []race, err error) {
 }
 
 func countWins(r race) int {
-	sq := math.Sqrt(float64(r.time*r.time - 4*r.distance))
-	lower := math.Ceil((float64(r.time) - sq) / 2)
-	upper := math.Floor((float64(r.time) + sq) / 2)
+	a := float64(-1)
+	b := float64(r.time)
+	c := -float64(r.distance)
 
-	return int(upper) + 1 - int(lower)
+	d := b*b - 4*a*c
+
+	lower := (-b + math.Sqrt(d)) / (2 * a)
+	upper := (-b - math.Sqrt(d)) / (2 * a)
+
+	return int(math.Ceil(upper-1) - math.Floor(lower+1) + 1)
 }
 
 func solve(input string, parseLine ParseLine) (int, error) {
