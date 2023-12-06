@@ -6,22 +6,22 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-const exampleInput = `1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet`
-
 func Benchmark_Part1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Part1(exampleInput)
+		Part1(input)
 	}
 }
 
 func Benchmark_Part2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Part2(exampleInput)
+		Part2(input)
 	}
 }
+
+const exampleInput = `1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet`
 
 func Test_Part1(t *testing.T) {
 	util.Tests[int]{

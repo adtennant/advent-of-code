@@ -6,19 +6,19 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-const exampleInput = ``
-
 func Benchmark_Part1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Part1(exampleInput)
+		Part1(input)
 	}
 }
 
 func Benchmark_Part2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Part2(exampleInput)
+		Part2(input)
 	}
 }
+
+const exampleInput = ``
 
 func Test_Part1(t *testing.T) {
 	util.Tests[int]{
