@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 
@@ -44,17 +45,11 @@ func parseRaces(input string, parseLine ParseLine) (races []race, err error) {
 }
 
 func countWins(r race) int {
-	wins := 0
+	sq := math.Sqrt(float64(r.time*r.time - 4*r.distance))
+	lower := math.Ceil((float64(r.time) - sq) / 2)
+	upper := math.Floor((float64(r.time) + sq) / 2)
 
-	for i := 0; i < r.time; i++ {
-		d := i * (r.time - i)
-
-		if d > r.distance {
-			wins++
-		}
-	}
-
-	return wins
+	return int(upper) + 1 - int(lower)
 }
 
 func solve(input string, parseLine ParseLine) (int, error) {

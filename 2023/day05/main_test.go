@@ -40,6 +40,18 @@ humidity-to-location map:
 60 56 37
 56 93 4`
 
+func Benchmark_Part1(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Part1(exampleInput)
+	}
+}
+
+func Benchmark_Part2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Part2(exampleInput)
+	}
+}
+
 func Test_Part1(t *testing.T) {
 	util.Tests[int64]{
 		{
