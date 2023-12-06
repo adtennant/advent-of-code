@@ -18,15 +18,13 @@ func Benchmark_Part2(b *testing.B) {
 	}
 }
 
-const exampleInput = `1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet`
-
 func Test_Part1(t *testing.T) {
 	util.Tests[int]{
 		{
-			Input:    exampleInput,
+			Input: `1abc2
+			pqr3stu8vwx
+			a1b2c3d4e5f
+			treb7uchet`,
 			Expected: 142,
 		},
 	}.Run(t, Part1)
@@ -35,7 +33,13 @@ func Test_Part1(t *testing.T) {
 func Test_Part2(t *testing.T) {
 	util.Tests[int]{
 		{
-			Input:    exampleInput,
+			Input: `two1nine
+			eightwothree
+			abcone2threexyz
+			xtwone3four
+			4nineeightseven2
+			zoneight234
+			7pqrstsixteen`,
 			Expected: 281,
 		},
 	}.Run(t, Part2)
