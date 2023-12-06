@@ -7,16 +7,16 @@ import (
 )
 
 func Part1(input string) (int, error) {
-	return 0, nil
+	return -1, nil
 }
 
 func Part2(input string) (int, error) {
-	return 0, nil
+	return -1, nil
 }
 
 //go:embed input.txt
 var input string
 
 func main() {
-	util.Main(input, Part1, Part2)
+	util.Run(Part1, Part2, input)
 }

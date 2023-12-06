@@ -6,41 +6,28 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-func Benchmark_Part1(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Part1(input)
-	}
-}
-
-func Benchmark_Part2(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Part2(input)
-	}
-}
-
-func Test_Part1(t *testing.T) {
-	util.Tests[int]{
-		{
-			Input: `1abc2
-			pqr3stu8vwx
-			a1b2c3d4e5f
-			treb7uchet`,
-			Expected: 142,
+func Test_Day1(t *testing.T) {
+	util.RunTests(t, util.Part[int]{
+		Solution: Part1,
+		Tests: []util.Test[int]{
+			{
+				Input: `1abc2
+				pqr3stu8vwx
+				a1b2c3d4e5f
+				treb7uchet`,
+				Expected: 142,
+			},
 		},
-	}.Run(t, Part1)
-}
-
-func Test_Part2(t *testing.T) {
-	util.Tests[int]{
-		{
-			Input: `two1nine
-			eightwothree
-			abcone2threexyz
-			xtwone3four
-			4nineeightseven2
-			zoneight234
-			7pqrstsixteen`,
-			Expected: 281,
+	}, util.Part[int]{
+		Solution: Part2,
+		Tests: []util.Test[int]{
+			{
+				Input: `1abc2
+				pqr3stu8vwx
+				a1b2c3d4e5f
+				treb7uchet`,
+				Expected: 142,
+			},
 		},
-	}.Run(t, Part2)
+	})
 }

@@ -105,5 +105,5 @@ func Part2(input string) (int, error) {
 var input string
 
 func main() {
-	util.Main(input, Part1, Part2)
+	util.Run(Part1, Part2, input)
 }

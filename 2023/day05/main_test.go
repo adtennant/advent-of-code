@@ -6,18 +6,6 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-func Benchmark_Part1(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Part1(input)
-	}
-}
-
-func Benchmark_Part2(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Part2(input)
-	}
-}
-
 const exampleInput = `seeds: 79 14 55 13
 
 seed-to-soil map:
@@ -52,20 +40,22 @@ humidity-to-location map:
 60 56 37
 56 93 4`
 
-func Test_Part1(t *testing.T) {
-	util.Tests[int64]{
-		{
-			Input:    exampleInput,
-			Expected: 35,
+func Test_Day5(t *testing.T) {
+	util.RunTests(t, util.Part[int64]{
+		Solution: Part1,
+		Tests: []util.Test[int64]{
+			{
+				Input:    exampleInput,
+				Expected: 35,
+			},
 		},
-	}.Run(t, Part1)
-}
-
-func Test_Part2(t *testing.T) {
-	util.Tests[int64]{
-		{
-			Input:    exampleInput,
-			Expected: 46,
+	}, util.Part[int64]{
+		Solution: Part2,
+		Tests: []util.Test[int64]{
+			{
+				Input:    exampleInput,
+				Expected: 46,
+			},
 		},
-	}.Run(t, Part2)
+	})
 }
