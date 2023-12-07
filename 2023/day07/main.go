@@ -38,11 +38,8 @@ func (h hand) kind(useJokers bool) HandKind {
 		jokers := cards['J']
 		delete(cards, 'J')
 
-		var maxCard byte
-		var maxCount int
-		for maxCard, maxCount = range cards {
-			break
-		}
+		maxCard := byte('X')
+		maxCount := -1
 
 		for card, count := range cards {
 			if count > maxCount {
