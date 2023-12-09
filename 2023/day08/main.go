@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"strings"
 
 	"adtennant.dev/aoc/util"
@@ -14,39 +15,46 @@ type node struct {
 
 func parseNode(str string) (string, node, error) {
 	parts := strings.Split(str, " = ")
+	if len(parts) != 2 {
+		return "", node{}, fmt.Errorf("invalid node format")
+	}
 
 	name := parts[0]
 
 	parts = strings.Split(parts[1], ", ")
+	if len(parts) != 2 {
+		return "", node{}, fmt.Errorf("invalid node format")
+	}
+
 	left := strings.TrimPrefix(parts[0], "(")
 	right := strings.TrimSuffix(parts[1], ")")
 
 	return name, node{left, right}, nil
 }
 
-func parse(input string) ([]byte, map[string]node) {
+func parse(input string) ([]byte, map[string]node, error) {
 	lines := util.Lines(input)
 
 	instrs := []byte(lines[0])
-
 	network := make(map[string]node)
 
 	for i := 2; i < len(lines); i++ {
-		name, node, _ := parseNode(lines[i])
+		name, node, err := parseNode(lines[i])
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to parse node: %w", err)
+		}
 
 		network[name] = node
 	}
 
-	return instrs, network
+	return instrs, network, nil
 }
 
-func Part1(input string) (int, error) {
-	instrs, network := parse(input)
-
-	current := "AAA"
+func countSteps(instrs []byte, network map[string]node, start string, done func(string) bool) int {
+	current := start
 	steps := 0
 
-	for current != "ZZZ" {
+	for !done(current) {
 		instr := instrs[steps%len(instrs)]
 
 		switch instr {
@@ -59,7 +67,18 @@ func Part1(input string) (int, error) {
 		steps++
 	}
 
-	return steps, nil
+	return steps
+}
+
+func Part1(input string) (int, error) {
+	instrs, network, err := parse(input)
+	if err != nil {
+		return -1, err
+	}
+
+	return countSteps(instrs, network, "AAA", func(current string) bool {
+		return current == "ZZZ"
+	}), nil
 }
 
 func gcd(a, b int) int {
@@ -81,7 +100,10 @@ func lcm(x ...int) int {
 }
 
 func Part2(input string) (int, error) {
-	instrs, network := parse(input)
+	instrs, network, err := parse(input)
+	if err != nil {
+		return -1, err
+	}
 
 	var ghosts []string
 
@@ -94,20 +116,9 @@ func Part2(input string) (int, error) {
 	var shortest []int
 
 	for _, ghost := range ghosts {
-		steps := 0
-
-		for !strings.HasSuffix(ghost, "Z") {
-			instr := instrs[steps%len(instrs)]
-
-			switch instr {
-			case 'L':
-				ghost = network[ghost].left
-			case 'R':
-				ghost = network[ghost].right
-			}
-
-			steps++
-		}
+		steps := countSteps(instrs, network, ghost, func(current string) bool {
+			return strings.HasSuffix(current, "Z")
+		})
 
 		shortest = append(shortest, steps)
 	}

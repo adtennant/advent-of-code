@@ -37,12 +37,12 @@ func parseNumbers(str string) (numbers []int, err error) {
 func parseScratchcard(line string) (scratchcard, error) {
 	parts := strings.Split(line, ":")
 	if len(parts) != 2 {
-		return scratchcard{}, fmt.Errorf("invalid format")
+		return scratchcard{}, fmt.Errorf("invalid scratchcard format")
 	}
 
 	parts = strings.Split(parts[1], "|")
 	if len(parts) != 2 {
-		return scratchcard{}, fmt.Errorf("invalid format")
+		return scratchcard{}, fmt.Errorf("invalid scratchcard format")
 	}
 
 	winningNumbers, err := parseNumbers(strings.TrimSpace(parts[0]))

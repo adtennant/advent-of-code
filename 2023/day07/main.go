@@ -78,7 +78,7 @@ func (h hand) kind(useJokers bool) HandKind {
 func parseHand(str string) (hand, error) {
 	parts := strings.Split(str, " ")
 	if len(parts) != 2 {
-		return hand{}, fmt.Errorf("invalid format")
+		return hand{}, fmt.Errorf("invalid hand format")
 	}
 
 	cards := []byte(parts[0])

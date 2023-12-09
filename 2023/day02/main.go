@@ -39,7 +39,7 @@ func parseResult(str string) (result, error) {
 	for _, color := range colors {
 		parts := strings.Split(strings.TrimSpace(color), " ")
 		if len(parts) != 2 {
-			return res, fmt.Errorf("invalid format")
+			return res, fmt.Errorf("invalid result format")
 		}
 
 		num, err := strconv.Atoi(parts[0])
@@ -78,7 +78,7 @@ func parseResults(str string) (results []result, err error) {
 func parseGame(line string) (game, error) {
 	parts := strings.Split(line, ":")
 	if len(parts) != 2 {
-		return game{}, fmt.Errorf("invalid format")
+		return game{}, fmt.Errorf("invalid game format")
 	}
 
 	id, err := parseID(parts[0])
