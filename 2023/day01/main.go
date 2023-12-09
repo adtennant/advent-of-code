@@ -50,7 +50,7 @@ func extractNumberOrWord(str string) (int, bool) {
 }
 
 func extractFirst(str string, extract ExtractFunc) (int, bool) {
-	for i := 0; i < len(str); i++ {
+	for i := range str {
 		if num, found := extract(str[i:]); found {
 			return num, true
 		}

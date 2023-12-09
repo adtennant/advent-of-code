@@ -34,7 +34,7 @@ func parseRaces(input string, parseLine ParseLine) (races []race, err error) {
 		return nil, fmt.Errorf("mismatch between number of times and distances")
 	}
 
-	for i := 0; i < len(times); i++ {
+	for i := range times {
 		races = append(races, race{
 			time:     times[i],
 			distance: distances[i],

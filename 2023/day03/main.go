@@ -26,11 +26,10 @@ type schematic struct {
 	gears   map[point]bool
 }
 
-func extractPartNumber(str string) (int, int, error) {
+func extractPartNumber(str string) (int, error) {
 	num := ""
-	i := 0
 
-	for ; i < len(str); i++ {
+	for i := range str {
 		if unicode.IsDigit(rune(str[i])) {
 			num += string(str[i])
 		} else {
@@ -40,10 +39,10 @@ func extractPartNumber(str string) (int, int, error) {
 
 	n, err := strconv.Atoi(num)
 	if err != nil {
-		return -1, -1, err
+		return -1, err
 	}
 
-	return n, i, nil
+	return n, nil
 }
 
 func parseSchematic(input string) (s schematic, err error) {
@@ -55,7 +54,9 @@ func parseSchematic(input string) (s schematic, err error) {
 
 		for x < len(line) {
 			if line[x] >= '0' && line[x] <= '9' {
-				num, len, err := extractPartNumber(line[x:])
+				num, err := extractPartNumber(line[x:])
+				len := len(strconv.Itoa(num))
+
 				if err != nil {
 					return s, fmt.Errorf("failed to extract part number: %w", err)
 				}
