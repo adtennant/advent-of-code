@@ -6,8 +6,6 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-const exampleInput = ``
-
 func Test_Day10(t *testing.T) {
 	util.RunTests(t, util.Part[int]{
 		Solution: Part1,
