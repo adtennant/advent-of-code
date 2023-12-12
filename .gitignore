@@ -1,1 +1,5 @@
 .DS_Store
+
+[Dd]ay[0-9].txt
+[Dd]ay[0-9][0-9].txt
+input.txt
