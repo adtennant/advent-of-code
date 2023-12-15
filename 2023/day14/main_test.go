@@ -6,29 +6,24 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-const exampleInput = `#.##..##.
-..#.##.#.
-##......#
-##......#
-..#.##.#.
-..##..##.
-#.#.##.#.
+const exampleInput = `O....#....
+O.OO#....#
+.....##...
+OO.#O....O
+.O.....O#.
+O.#..O.#.#
+..O..#O..O
+.......O..
+#....###..
+#OO..#....`
 
-#...##..#
-#....#..#
-..##..###
-#####.##.
-#####.##.
-..##..###
-#....#..#`
-
-func Test_Day13(t *testing.T) {
+func Test_Day14(t *testing.T) {
 	util.RunTests(t, util.Part[int]{
 		Solution: Part1,
 		Tests: []util.Test[int]{
 			{
 				Input:    exampleInput,
-				Expected: 405,
+				Expected: 136,
 			},
 		},
 	}, util.Part[int]{
@@ -36,7 +31,7 @@ func Test_Day13(t *testing.T) {
 		Tests: []util.Test[int]{
 			{
 				Input:    exampleInput,
-				Expected: 400,
+				Expected: 64,
 			},
 		},
 	})

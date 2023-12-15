@@ -11,12 +11,12 @@ import (
 )
 
 type pattern struct {
-	rbits []uint
-	cbits []uint
+	rows []uint
+	cols []uint
 }
 
-func convertToBits(rowOrColl string) (uint, error) {
-	bits, err := strconv.ParseInt(strings.ReplaceAll(strings.ReplaceAll(rowOrColl, ".", "0"), "#", "1"), 2, 32)
+func convertToBits(rowOrCol string) (uint, error) {
+	bits, err := strconv.ParseInt(strings.ReplaceAll(strings.ReplaceAll(rowOrCol, ".", "0"), "#", "1"), 2, 32)
 	if err != nil {
 		return 0, err
 	}
@@ -71,7 +71,7 @@ func parsePatterns(input string) (patterns []pattern, err error) {
 
 		patterns = append(patterns, pattern)
 
-		i += len(pattern.rbits)
+		i += len(pattern.rows)
 	}
 
 	return patterns, nil
@@ -104,8 +104,8 @@ func solve(patterns []pattern, targetDiff int) int {
 	rows := 0
 
 	for _, p := range patterns {
-		cols += sumMirrorIndexes(p.cbits, targetDiff)
-		rows += sumMirrorIndexes(p.rbits, targetDiff)
+		cols += sumMirrorIndexes(p.cols, targetDiff)
+		rows += sumMirrorIndexes(p.rows, targetDiff)
 	}
 
 	return rows*100 + cols
