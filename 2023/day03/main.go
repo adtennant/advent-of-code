@@ -9,10 +9,7 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-type point struct {
-	x int
-	y int
-}
+type point = util.Point[int]
 
 type partNumber struct {
 	value        int
@@ -68,9 +65,9 @@ func parseSchematic(input string) (s schematic, err error) {
 			} else {
 				if line[x] != '.' {
 					if line[x] == '*' {
-						s.gears[point{x, y}] = true
+						s.gears[point{X: x, Y: y}] = true
 					} else {
-						s.symbols[point{x, y}] = true
+						s.symbols[point{X: x, Y: y}] = true
 					}
 				}
 
@@ -94,7 +91,7 @@ func Part1(input string) (int, error) {
 	loop:
 		for y := part.y - 1; y <= part.y+1; y++ {
 			for x := part.startX - 1; x <= part.endX+1; x++ {
-				if schematic.symbols[point{x, y}] || schematic.gears[point{x, y}] {
+				if schematic.symbols[point{X: x, Y: y}] || schematic.gears[point{X: x, Y: y}] {
 					sum += part.value
 					break loop
 				}
@@ -117,8 +114,8 @@ func Part2(input string) (int, error) {
 	loop:
 		for y := part.y - 1; y <= part.y+1; y++ {
 			for x := part.startX - 1; x <= part.endX+1; x++ {
-				if schematic.gears[point{x, y}] {
-					partsByGear[point{x, y}] = append(partsByGear[point{x, y}], part)
+				if schematic.gears[point{X: x, Y: y}] {
+					partsByGear[point{X: x, Y: y}] = append(partsByGear[point{X: x, Y: y}], part)
 					break loop
 				}
 			}

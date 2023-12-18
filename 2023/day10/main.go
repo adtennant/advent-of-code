@@ -8,13 +8,6 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-var directions = map[byte]point{
-	'n': {0, -1},
-	's': {0, 1},
-	'e': {1, 0},
-	'w': {-1, 0},
-}
-
 var corners = map[byte]bool{
 	'L': true,
 	'J': true,
@@ -23,36 +16,35 @@ var corners = map[byte]bool{
 	'S': true,
 }
 
-var neighbours = map[byte][]byte{
-	'|': {'n', 's'},
-	'-': {'e', 'w'},
-	'L': {'n', 'e'},
-	'J': {'n', 'w'},
-	'7': {'s', 'w'},
-	'F': {'s', 'e'},
+var neighbours = map[byte][]util.Direction{
+	'|': {util.UP, util.DOWN},
+	'-': {util.RIGHT, util.LEFT},
+	'L': {util.UP, util.RIGHT},
+	'J': {util.UP, util.LEFT},
+	'7': {util.DOWN, util.LEFT},
+	'F': {util.DOWN, util.RIGHT},
 	'.': {},
-	'S': {'s'}, // TODO: Don't hardcode this, s works for my input and all tests
+	'S': {util.DOWN}, // TODO: Don't hardcode this, s works for my input and all tests
 }
 
-type point struct {
-	x, y int
-}
+type point = util.Point[int]
 
 func findLoop(grid map[point]byte, start point) []point {
-	queue := []point{start}
+	q := util.NewQueue[point]()
+	q.Push(start)
+
 	loop := []point{start}
 
 	explored := map[point]bool{
 		start: true,
 	}
 
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
+	for q.Len() > 0 {
+		current := q.Pop()
 
 		for _, dir := range neighbours[grid[current]] {
-			delta := directions[dir]
-			next := point{current.x + delta.x, current.y + delta.y}
+			delta := util.Delta[int](dir)
+			next := current.Add(delta)
 
 			if _, ok := grid[next]; !ok {
 				continue
@@ -62,7 +54,7 @@ func findLoop(grid map[point]byte, start point) []point {
 				continue
 			}
 
-			queue = append(queue, next)
+			q.Push(next)
 			explored[next] = true
 
 			loop = append(loop, next)
@@ -112,7 +104,7 @@ func shoelace(verts []point) int {
 	v0 := verts[len(verts)-1]
 
 	for _, v1 := range verts {
-		sum += v0.y*v1.x - v0.x*v1.y
+		sum += v0.Y*v1.X - v0.X*v1.Y
 		v0 = v1
 	}
 

@@ -6,9 +6,7 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-type point struct {
-	x, y int
-}
+type point = util.Point[int]
 
 func parseGrid(input string) (map[point]byte, int, int) {
 	lines := util.Lines(input)
@@ -16,7 +14,7 @@ func parseGrid(input string) (map[point]byte, int, int) {
 
 	for y, line := range lines {
 		for x, c := range []byte(line) {
-			grid[point{x, y}] = c
+			grid[point{X: x, Y: y}] = c
 		}
 	}
 
@@ -26,106 +24,90 @@ func parseGrid(input string) (map[point]byte, int, int) {
 	return grid, width, height
 }
 
-type direction byte
-
-const (
-	UP    direction = 'u'
-	DOWN  direction = 'd'
-	LEFT  direction = 'l'
-	RIGHT direction = 'r'
-)
-
-var directions = map[direction]point{
-	'u': {0, -1},
-	'd': {0, 1},
-	'l': {-1, 0},
-	'r': {1, 0},
-}
-
 type beam struct {
-	p   point
-	dir direction
+	pos point
+	dir util.Direction
 }
 
-func next(current point, dir direction) beam {
-	delta := directions[dir]
+func next(current point, dir util.Direction) beam {
+	delta := util.Delta[int](dir)
 
 	return beam{
-		point{current.x + delta.x, current.y + delta.y},
+		current.Add(delta),
 		dir,
 	}
 }
 
 func castBeam(grid map[point]byte, b beam) int {
-	queue := []beam{b}
-	seen := make(map[beam]bool)
+	q := util.NewQueue[beam]()
+	q.Push(b)
 
-	energised := make(map[point]bool)
+	seen := util.NewSet[beam]()
+	energised := util.NewSet[point]()
 
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
+	for q.Len() > 0 {
+		current := q.Pop()
 
-		if _, ok := grid[current.p]; !ok {
+		if _, ok := grid[current.pos]; !ok {
 			continue
 		}
 
-		if seen[current] {
+		if seen.Contains(current) {
 			continue
 		}
 
-		seen[current] = true
-		energised[current.p] = true
+		seen.Insert(current)
+		energised.Insert(current.pos)
 
-		switch grid[current.p] {
+		switch grid[current.pos] {
 		case '.':
-			queue = append(queue, next(current.p, current.dir))
+			q.Push(next(current.pos, current.dir))
 		case '/':
 			switch current.dir {
-			case UP:
-				queue = append(queue, next(current.p, RIGHT))
-			case DOWN:
-				queue = append(queue, next(current.p, LEFT))
-			case RIGHT:
-				queue = append(queue, next(current.p, UP))
-			case LEFT:
-				queue = append(queue, next(current.p, DOWN))
+			case util.UP:
+				q.Push(next(current.pos, util.RIGHT))
+			case util.DOWN:
+				q.Push(next(current.pos, util.LEFT))
+			case util.RIGHT:
+				q.Push(next(current.pos, util.UP))
+			case util.LEFT:
+				q.Push(next(current.pos, util.DOWN))
 			}
 		case '\\':
 			switch current.dir {
-			case UP:
-				queue = append(queue, next(current.p, LEFT))
-			case DOWN:
-				queue = append(queue, next(current.p, RIGHT))
-			case RIGHT:
-				queue = append(queue, next(current.p, DOWN))
-			case LEFT:
-				queue = append(queue, next(current.p, UP))
+			case util.UP:
+				q.Push(next(current.pos, util.LEFT))
+			case util.DOWN:
+				q.Push(next(current.pos, util.RIGHT))
+			case util.RIGHT:
+				q.Push(next(current.pos, util.DOWN))
+			case util.LEFT:
+				q.Push(next(current.pos, util.UP))
 			}
 		case '|':
 			switch current.dir {
-			case LEFT, RIGHT:
-				queue = append(queue, next(current.p, UP), next(current.p, DOWN))
+			case util.LEFT, util.RIGHT:
+				q.Push(next(current.pos, util.UP), next(current.pos, util.DOWN))
 			default:
-				queue = append(queue, next(current.p, current.dir))
+				q.Push(next(current.pos, current.dir))
 			}
 		case '-':
 			switch current.dir {
-			case UP, DOWN:
-				queue = append(queue, next(current.p, LEFT), next(current.p, RIGHT))
+			case util.UP, util.DOWN:
+				q.Push(next(current.pos, util.LEFT), next(current.pos, util.RIGHT))
 			default:
-				queue = append(queue, next(current.p, current.dir))
+				q.Push(next(current.pos, current.dir))
 			}
 		}
 	}
 
-	return len(energised)
+	return energised.Len()
 }
 
 func Part1(input string) (int, error) {
 	grid, _, _ := parseGrid(input)
 
-	return castBeam(grid, beam{point{0, 0}, RIGHT}), nil
+	return castBeam(grid, beam{point{X: 0, Y: 0}, util.RIGHT}), nil
 }
 
 func Part2(input string) (int, error) {
@@ -134,11 +116,19 @@ func Part2(input string) (int, error) {
 	var startingBeams []beam
 
 	for x := 0; x < width; x++ {
-		startingBeams = append(startingBeams, beam{point{x, 0}, DOWN}, beam{point{x, height - 1}, UP})
+		startingBeams = append(
+			startingBeams,
+			beam{point{X: x, Y: 0}, util.DOWN},
+			beam{point{X: x, Y: height - 1}, util.UP},
+		)
 	}
 
 	for y := 0; y < height; y++ {
-		startingBeams = append(startingBeams, beam{point{0, y}, RIGHT}, beam{point{width - 1, y}, LEFT})
+		startingBeams = append(
+			startingBeams,
+			beam{point{X: 0, Y: y}, util.RIGHT},
+			beam{point{X: width - 1, Y: y}, util.LEFT},
+		)
 	}
 
 	maxEnergised := 0

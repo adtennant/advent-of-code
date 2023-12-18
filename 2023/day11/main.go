@@ -7,9 +7,7 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-type point struct {
-	x, y int64
-}
+type point = util.Point[int64]
 
 type image struct {
 	galaxies  []point
@@ -68,16 +66,16 @@ func parseImage(input string) image {
 }
 
 func findDistance(a, b point, emptyRows map[int64]bool, emptyCols map[int64]bool, expansion int64) int64 {
-	dx := int64(math.Abs(float64(a.x - b.x)))
-	dy := int64(math.Abs(float64(a.y - b.y)))
+	dx := int64(math.Abs(float64(a.X - b.X)))
+	dy := int64(math.Abs(float64(a.Y - b.Y)))
 
-	for x := min(a.x, b.x); x < max(a.x, b.x); x++ {
+	for x := min(a.X, b.X); x < max(a.X, b.X); x++ {
 		if emptyCols[x] {
 			dx += int64(expansion)
 		}
 	}
 
-	for y := min(a.y, b.y); y < max(a.y, b.y); y++ {
+	for y := min(a.Y, b.Y); y < max(a.Y, b.Y); y++ {
 		if emptyRows[y] {
 			dy += int64(expansion)
 		}
