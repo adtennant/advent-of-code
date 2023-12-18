@@ -60,15 +60,14 @@ func parsePlanFromHex(input string) (plan []entry, err error) {
 
 type point = util.Point[int64]
 
-func Part1(input string) (int64, error) {
-	plan, _ := parsePlan(input)
+func solve(plan []entry) int64 {
 	start := point{X: 0, Y: 0}
 
 	a := int64(0)
 
 	for _, e := range plan {
-		delta := util.Delta[int64](e.dir)
-		end := point{X: start.X + delta.X*e.distance, Y: start.Y + delta.Y*e.distance}
+		delta := util.GetDelta[int64](e.dir)
+		end := start.Translate(delta.Scale(e.distance))
 
 		a += (start.Y + end.Y) * (start.X - end.X)
 		a += e.distance
@@ -76,26 +75,17 @@ func Part1(input string) (int64, error) {
 		start = end
 	}
 
-	return (a / 2) + 1, nil
+	return (a / 2) + 1
+}
+
+func Part1(input string) (int64, error) {
+	plan, _ := parsePlan(input)
+	return solve(plan), nil
 }
 
 func Part2(input string) (int64, error) {
 	plan, _ := parsePlanFromHex(input)
-	start := point{X: 0, Y: 0}
-
-	a := int64(0)
-
-	for _, e := range plan {
-		delta := util.Delta[int64](e.dir)
-		end := point{X: start.X + delta.X*e.distance, Y: start.Y + delta.Y*e.distance}
-
-		a += (start.Y + end.Y) * (start.X - end.X)
-		a += e.distance
-
-		start = end
-	}
-
-	return (a / 2) + 1, nil
+	return solve(plan), nil
 }
 
 //go:embed input.txt

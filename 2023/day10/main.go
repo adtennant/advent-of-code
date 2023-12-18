@@ -43,8 +43,8 @@ func findLoop(grid map[point]byte, start point) []point {
 		current := q.Pop()
 
 		for _, dir := range neighbours[grid[current]] {
-			delta := util.Delta[int](dir)
-			next := current.Add(delta)
+			delta := util.GetDelta[int](dir)
+			next := current.Translate(delta)
 
 			if _, ok := grid[next]; !ok {
 				continue

@@ -70,8 +70,8 @@ func f(grid map[point]int, start, end point, minSteps, maxSteps int) int {
 				continue
 			}
 
-			delta := util.Delta[int](dir)
-			next := current.pos.Add(delta) //point{current.pos.x + delta.x, current.pos.y + delta.y}
+			delta := util.GetDelta[int](dir)
+			next := current.pos.Translate(delta) //point{current.pos.x + delta.x, current.pos.y + delta.y}
 
 			if _, ok := grid[next]; !ok {
 				continue

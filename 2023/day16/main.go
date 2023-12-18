@@ -30,10 +30,10 @@ type beam struct {
 }
 
 func next(current point, dir util.Direction) beam {
-	delta := util.Delta[int](dir)
+	delta := util.GetDelta[int](dir)
 
 	return beam{
-		current.Add(delta),
+		current.Translate(delta),
 		dir,
 	}
 }
