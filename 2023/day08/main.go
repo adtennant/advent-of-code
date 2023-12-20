@@ -81,24 +81,6 @@ func Part1(input string) (int, error) {
 	}), nil
 }
 
-func gcd(a, b int) int {
-	for b != 0 {
-		a, b = b, a%b
-	}
-
-	return a
-}
-
-func lcm(x ...int) int {
-	if len(x) == 1 {
-		return x[0]
-	} else if len(x) > 2 {
-		return lcm(x[0], lcm(x[1:]...))
-	}
-
-	return x[0] * x[1] / gcd(x[0], x[1])
-}
-
 func Part2(input string) (int, error) {
 	instrs, network, err := parse(input)
 	if err != nil {
@@ -123,7 +105,7 @@ func Part2(input string) (int, error) {
 		shortest = append(shortest, steps)
 	}
 
-	return lcm(shortest...), nil
+	return util.LCM(shortest...), nil
 }
 
 //go:embed input.txt
