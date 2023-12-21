@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"math"
 
 	"adtennant.dev/aoc/util"
@@ -29,7 +28,7 @@ var neighbours = map[byte][]util.Direction{
 
 type point = util.Point[int]
 
-func findLoop(grid map[point]byte, start point) []point {
+func findLoop(grid *util.Grid, start point) []point {
 	q := util.NewQueue[point]()
 	q.Push(start)
 
@@ -42,11 +41,11 @@ func findLoop(grid map[point]byte, start point) []point {
 	for q.Len() > 0 {
 		current := q.Pop()
 
-		for _, dir := range neighbours[grid[current]] {
+		for _, dir := range neighbours[grid.Get(current)] {
 			delta := util.GetDelta[int](dir)
 			next := current.Translate(delta)
 
-			if _, ok := grid[next]; !ok {
+			if _, ok := grid.TryGet(next); !ok {
 				continue
 			}
 
@@ -64,35 +63,9 @@ func findLoop(grid map[point]byte, start point) []point {
 	return loop
 }
 
-func findStart(grid map[point]byte) (point, error) {
-	for p, c := range grid {
-		if c == 'S' {
-			return p, nil
-		}
-	}
-
-	return point{}, fmt.Errorf("start not found")
-}
-
-func parseGrid(input string) map[point]byte {
-	grid := make(map[point]byte)
-
-	for y, line := range util.Lines(input) {
-		for x, c := range []byte(line) {
-			grid[point{x, y}] = c
-		}
-	}
-
-	return grid
-}
-
 func Part1(input string) (int, error) {
-	grid := parseGrid(input)
-
-	start, err := findStart(grid)
-	if err != nil {
-		return -1, err
-	}
+	grid := util.ParseGrid(input)
+	start := grid.Find('S')[0]
 
 	loop := findLoop(grid, start)
 
@@ -112,19 +85,15 @@ func shoelace(verts []point) int {
 }
 
 func Part2(input string) (int, error) {
-	grid := parseGrid(input)
-
-	start, err := findStart(grid)
-	if err != nil {
-		return -1, err
-	}
+	grid := util.ParseGrid(input)
+	start := grid.Find('S')[0]
 
 	loop := findLoop(grid, start)
 
 	var verts []point
 
 	for _, p := range loop {
-		if corners[grid[p]] {
+		if corners[grid.Get(p)] {
 			verts = append(verts, p)
 		}
 	}

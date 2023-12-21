@@ -6,22 +6,6 @@ import (
 	"adtennant.dev/aoc/util"
 )
 
-func parseGrid(input string) (map[point]int, int, int) {
-	grid := make(map[point]int)
-	lines := util.Lines(input)
-
-	for y, line := range lines {
-		for x, c := range []byte(line) {
-			grid[point{X: x, Y: y}] = int(c - '0')
-		}
-	}
-
-	width := len(lines[0])
-	height := len(lines)
-
-	return grid, width, height
-}
-
 type point = util.Point[int]
 
 type state struct {
@@ -37,7 +21,7 @@ var neighbours = map[util.Direction][]util.Direction{
 	util.RIGHT: {util.RIGHT, util.UP, util.DOWN},
 }
 
-func f(grid map[point]int, start, end point, minSteps, maxSteps int) int {
+func f(grid *util.Grid, start, end point, minSteps, maxSteps int) int {
 	q := util.NewPriorityQueue[state]()
 	q.Push(state{start, util.RIGHT, 1}, 0)
 	q.Push(state{start, util.DOWN, 1}, 0)
@@ -73,7 +57,7 @@ func f(grid map[point]int, start, end point, minSteps, maxSteps int) int {
 			delta := util.GetDelta[int](dir)
 			next := current.pos.Translate(delta) //point{current.pos.x + delta.x, current.pos.y + delta.y}
 
-			if _, ok := grid[next]; !ok {
+			if _, ok := grid.TryGet(next); !ok {
 				continue
 			}
 
@@ -85,7 +69,7 @@ func f(grid map[point]int, start, end point, minSteps, maxSteps int) int {
 
 			seen.Insert(key)
 
-			q.Push(state{next, dir, steps}, cost+grid[next])
+			q.Push(state{next, dir, steps}, cost+int(grid.Get(next)-'0'))
 		}
 	}
 
@@ -93,13 +77,13 @@ func f(grid map[point]int, start, end point, minSteps, maxSteps int) int {
 }
 
 func Part1(input string) (int, error) {
-	grid, width, height := parseGrid(input)
-	return f(grid, point{X: 0, Y: 0}, point{X: width - 1, Y: height - 1}, 0, 3), nil
+	grid := util.ParseGrid(input)
+	return f(grid, point{X: 0, Y: 0}, point{X: grid.Width() - 1, Y: grid.Height() - 1}, 0, 3), nil
 }
 
 func Part2(input string) (int, error) {
-	grid, width, height := parseGrid(input)
-	return f(grid, point{X: 0, Y: 0}, point{X: width - 1, Y: height - 1}, 4, 10), nil
+	grid := util.ParseGrid(input)
+	return f(grid, point{X: 0, Y: 0}, point{X: grid.Width() - 1, Y: grid.Height() - 1}, 4, 10), nil
 }
 
 //go:embed input.txt

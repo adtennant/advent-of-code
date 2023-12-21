@@ -8,22 +8,6 @@ import (
 
 type point = util.Point[int]
 
-func parseGrid(input string) (map[point]byte, int, int) {
-	lines := util.Lines(input)
-	grid := make(map[point]byte)
-
-	for y, line := range lines {
-		for x, c := range []byte(line) {
-			grid[point{X: x, Y: y}] = c
-		}
-	}
-
-	width := len(lines[0])
-	height := len(lines)
-
-	return grid, width, height
-}
-
 type beam struct {
 	pos point
 	dir util.Direction
@@ -38,7 +22,7 @@ func next(current point, dir util.Direction) beam {
 	}
 }
 
-func castBeam(grid map[point]byte, b beam) int {
+func castBeam(grid *util.Grid, b beam) int {
 	q := util.NewQueue[beam]()
 	q.Push(b)
 
@@ -48,7 +32,7 @@ func castBeam(grid map[point]byte, b beam) int {
 	for q.Len() > 0 {
 		current := q.Pop()
 
-		if _, ok := grid[current.pos]; !ok {
+		if _, ok := grid.TryGet(current.pos); !ok {
 			continue
 		}
 
@@ -59,7 +43,7 @@ func castBeam(grid map[point]byte, b beam) int {
 		seen.Insert(current)
 		energised.Insert(current.pos)
 
-		switch grid[current.pos] {
+		switch grid.Get(current.pos) {
 		case '.':
 			q.Push(next(current.pos, current.dir))
 		case '/':
@@ -105,29 +89,29 @@ func castBeam(grid map[point]byte, b beam) int {
 }
 
 func Part1(input string) (int, error) {
-	grid, _, _ := parseGrid(input)
+	grid := util.ParseGrid(input)
 
 	return castBeam(grid, beam{point{X: 0, Y: 0}, util.RIGHT}), nil
 }
 
 func Part2(input string) (int, error) {
-	grid, width, height := parseGrid(input)
+	grid := util.ParseGrid(input)
 
 	var startingBeams []beam
 
-	for x := 0; x < width; x++ {
+	for x := 0; x < grid.Width(); x++ {
 		startingBeams = append(
 			startingBeams,
 			beam{point{X: x, Y: 0}, util.DOWN},
-			beam{point{X: x, Y: height - 1}, util.UP},
+			beam{point{X: x, Y: grid.Height() - 1}, util.UP},
 		)
 	}
 
-	for y := 0; y < height; y++ {
+	for y := 0; y < grid.Height(); y++ {
 		startingBeams = append(
 			startingBeams,
 			beam{point{X: 0, Y: y}, util.RIGHT},
-			beam{point{X: width - 1, Y: y}, util.LEFT},
+			beam{point{X: grid.Width() - 1, Y: y}, util.LEFT},
 		)
 	}
 
