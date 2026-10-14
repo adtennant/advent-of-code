@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "scala",
+      "request": "launch",
+      "name": "main",
+      "mainClass": "dev.adtennant.aoc.day01.main",
+      "buildTarget": "file:/Users/alex/Documents/Projects/advent-of-code/2025/?id=root-2025",
+      "args": [],
+      "jvmOptions": [],
+      "env": {}
+    }
+  ]
+}

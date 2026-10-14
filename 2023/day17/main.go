@@ -55,7 +55,7 @@ func f(grid *util.Grid, start, end point, minSteps, maxSteps int) int {
 			}
 
 			delta := util.GetDelta[int](dir)
-			next := current.pos.Translate(delta) //point{current.pos.x + delta.x, current.pos.y + delta.y}
+			next := current.pos.Translate(delta)
 
 			if _, ok := grid.TryGet(next); !ok {
 				continue
